@@ -33,6 +33,11 @@ class Scene:
         Fp = np.concatenate([F[..., :3] * al, al * 255.0], 2)          # premultiplied
         k = OUT_W / R.shape[1]
         self.F, self.Fd = [Fp, cv2.resize(Fp, (OUT_W, OUT_H), interpolation=cv2.INTER_AREA)], [1.0, k]
+        if a.f2:                                                         # a level at twice the density, so the near layer stays crisp when magnified
+            F2 = cv2.resize(Fp, (self.W * 2, self.H * 2), interpolation=cv2.INTER_LANCZOS4)
+            F2[..., :3] = F2[..., :3] + a.f2 * (F2[..., :3] - cv2.GaussianBlur(F2[..., :3], (0, 0), 1.8))
+            F2 = np.clip(F2, 0, 255); F2[..., :3] = np.minimum(F2[..., :3], F2[..., 3:4])
+            self.F, self.Fd = [F2] + self.F, [2.0] + self.Fd
         while min(self.F[-1].shape[:2]) > 64:
             self.F.append(cv2.pyrDown(self.F[-1])); self.Fd.append(self.Fd[-1] / 2)
         # room: level 0 at twice the end image's density (the upscaled room where it exists), level 1 is
@@ -146,6 +151,7 @@ def main():
     ap.add_argument('--hi-ref', help='the base resolution crop that was upscaled (detail only where the room still matches it)')
     ap.add_argument('--r2', action='store_true', help='use out/<home>-R2.png (twice the density) as the room level 0')
     ap.add_argument('--cross', type=float, nargs=2, help='where the camera passes the front layer (start view px)')
+    ap.add_argument('--f2', type=float, default=0.0, help='unsharp amount of a 2x density level of the front layer (0 = no such level)')
     ap.add_argument('--seconds', type=float, default=3.6)
     ap.add_argument('--fps', type=int, default=60)
     ap.add_argument('--blur', type=int, default=7)
