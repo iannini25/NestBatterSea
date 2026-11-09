@@ -188,10 +188,6 @@
         }
       }
 
-      /* 7. next steps: the timeline draws as it is read */
-      const fill = $('#tlfill');
-      if (fill) gsap.fromTo(fill, { scaleY: 0 }, { scaleY: 1, ease: 'none', scrollTrigger: { trigger: '#timeline', start: 'top 72%', end: 'bottom 58%', scrub: true } });
-
       return () => {                                                        // leaving this mood
         html.classList.remove('gsap-pin');
         $$('main [data-lines]').forEach(unsplit);

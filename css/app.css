@@ -644,21 +644,6 @@ html.gsap-pin .view.wide .view-media .ncard{height:calc(clamp(360px,36vw,640px) 
 .maplibregl-ctrl-attrib-button{filter:invert(1)}
 .maplibregl-cooperative-gesture-screen{background:rgba(10,12,18,.6)!important;color:var(--paper)!important;font-family:'Poppins',system-ui,sans-serif!important;font-size:15px!important}
 
-/* ---------------- 09 next steps ---------------- */
-.next{padding:calc(var(--sp) * .75) 0 var(--sp)}
-.next-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(40px,6vw,120px);align-items:start}
-.next-lead{display:grid;gap:26px;position:sticky;top:calc(var(--hb) + 2 * var(--m) + 30px)}
-.timeline{position:relative;list-style:none;padding-left:46px}
-.tl-line{position:absolute;left:12px;top:10px;bottom:10px;width:2px;background:rgba(255,255,255,.08);border-radius:2px}
-.tl-line i{position:absolute;inset:0;border-radius:2px;background:linear-gradient(180deg,var(--blue-hi),var(--blue) 60%,var(--blue-dk));transform-origin:50% 0}
-.step{position:relative;display:grid;gap:6px;padding:0 0 46px}
-.step::before{content:'';position:absolute;left:-40px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--page);border:2px solid var(--blue)}
-.step.now::before{background:var(--blue);box-shadow:0 0 0 6px rgba(146,183,202,.18)}
-.step small{font-size:10.5px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--blue)}
-.step b{font-size:clamp(20px,1.6vw,26px);font-weight:500;letter-spacing:-.025em}
-.step span{font-size:15px;line-height:1.7;color:var(--p2);max-width:560px}
-.step:last-child{padding-bottom:0}
-
 /* ---------------- 10 talk to us: css/talk.css ---------------- */
 
 /* ---------------- footer ---------------- */
@@ -854,7 +839,7 @@ html.gsap-pin .view.wide .view-media .ncard{height:calc(clamp(360px,36vw,640px) 
   .eco-big{justify-self:start}
   .eco-build{grid-template-columns:1fr;padding-top:28px}
   .eco-figs{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .eco-lead,.next-lead{position:relative;top:auto}
+  .eco-lead{position:relative;top:auto}
   .eco-list li{grid-template-columns:40px minmax(0,1fr);column-gap:16px;padding:16px 0}
   .eco-list svg{width:40px;height:40px;padding:9px}
   .eco-figs li{min-height:0;padding:16px}
@@ -880,10 +865,6 @@ html.gsap-pin .view.wide .view-media .ncard{height:calc(clamp(360px,36vw,640px) 
   .area-col.shift{padding-top:36px}
   .area-pic .px{aspect-ratio:4/5;border-radius:16px}
 
-  .next-grid{grid-template-columns:1fr;gap:44px}
-  .timeline{padding-left:40px}
-  .step::before{left:-34px}
-  .tl-line{left:8px}
 
 
   .foot{padding:40px var(--pad) 36px}
@@ -924,6 +905,8 @@ html.gsap-pin .view.wide .view-media .ncard{height:calc(clamp(360px,36vw,640px) 
   *,*::before,*::after{transition-duration:1ms!important;transition-delay:0s!important;animation-duration:1ms!important;animation-iteration-count:1!important}
   .js body:not(.in) #hero-title .ln i{transform:none}
   .mk-site .mk-pulse{display:none}
+  /* the panels are usable the moment the state changes: even a 1ms transition keeps them hidden for a frame */
+  .panel,.ppanel{transition:none!important}
 }
 
 /* Sustainability headline: exactly two lines on wide screens; it runs into the free space on its right */

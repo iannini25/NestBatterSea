@@ -299,7 +299,7 @@ for (const [id, name] of SECTIONS) {
   await sleep(1400);
   await shot(p, name);
 }
-check('All ten sections are on the page', await p.evaluate(() => ['vision', 'views', 'residences', 'homes', 'affordable', 'accessible', 'sustainability', 'location', 'next', 'contact'].every(id => document.getElementById(id))));
+check('All nine sections are on the page', await p.evaluate(() => ['vision', 'views', 'residences', 'homes', 'affordable', 'accessible', 'sustainability', 'location', 'contact'].every(id => document.getElementById(id))));
 if (gs.pinned) {
   // the exterior views slide sideways while the section is pinned
   const vx = await p.evaluate(async () => {
