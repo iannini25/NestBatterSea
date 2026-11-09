@@ -293,7 +293,7 @@ const hidden = await p.evaluate(() => {
 check('Every section reveals as it scrolls in; nothing stays hidden', !hidden.length, hidden.slice(0, 6).join(', ') || 'all visible');
 check('Below the fold images load lazily, each with its size', await p.evaluate(() => [...document.querySelectorAll('.sec img, .foot img')].every(i => i.loading === 'lazy' && i.getAttribute('width') && i.getAttribute('height'))));
 check('Section images are responsive (AVIF or WebP sources with srcset)', await p.evaluate(() => [...document.querySelectorAll('main .sec picture')].every(pc => pc.querySelector('source[type="image/avif"], source[type="image/webp"]'))));
-const SECTIONS = [['vision', '40-section-vision'], ['views', '41-section-views'], ['residences', '42-section-residences'], ['homes', '43-section-homes'], ['affordable', '44-section-affordable'], ['sustainability', '45-section-sustainability'], ['location', '46-section-location'], ['next', '47-section-next'], ['contact', '48-section-contact']];
+const SECTIONS = [['vision', '40-section-vision'], ['views', '41-section-views'], ['residences', '42-section-residences'], ['homes', '43-section-homes'], ['affordable', '44-section-affordable'], ['sustainability', '45-section-sustainability'], ['location', '46-section-location'], ['contact', '48-section-contact']];
 for (const [id, name] of SECTIONS) {
   await p.evaluate(id => window.scrollTo(0, document.getElementById(id).getBoundingClientRect().top + scrollY - 20), id);
   await sleep(1400);

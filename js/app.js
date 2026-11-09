@@ -62,6 +62,7 @@ let fit = { s: 1, W: 1, H: 1, cs: 1, cx: 0, cy: 0 }, zoomK = 1, settleId = 0, kb
 /* ---------- tiny tween (no external libraries) --------------------- */
 const ease = t => 1 - Math.pow(1 - t, 3);
 const easeIO = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+const smooth = t => t * t * t * (t * (t * 6 - 15) + 10);
 function tween(dur, fn, e = ease) {
   if (reduced || dur <= 0) { fn(1); return Promise.resolve(); }
   return new Promise(res => {
@@ -79,10 +80,10 @@ const raf = () => new Promise(r => requestAnimationFrame(r));
 const idle = fn => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 2000 }) : setTimeout(fn, 900));
 const show = (n, o = 1) => { n.style.visibility = 'visible'; n.style.opacity = o; };
 const hide = n => { n.style.opacity = 0; n.style.visibility = 'hidden'; };
-const fade = (n, to, dur) => {
+const fade = (n, to, dur, e) => {
   if (to > 0) n.style.visibility = 'visible';
   const from = parseFloat(n.style.opacity || (to > 0 ? 0 : 1));
-  return tween(dur, k => { n.style.opacity = from + (to - from) * k; }).then(() => { if (to === 0) n.style.visibility = 'hidden'; });
+  return tween(dur, k => { n.style.opacity = from + (to - from) * k; }, e).then(() => { if (to === 0) n.style.visibility = 'hidden'; });
 };
 
 /* ---------- state, window title, stage lock ------------------------ */
@@ -703,13 +704,15 @@ function shotShow(i, instant, rest) {
   const n = figs.length;
   [i, (i + 1) % n, (i - 1 + n) % n].forEach(fillShot);    // the room shown and its neighbours
   // the first view of the tour is where the walk in hands over: it starts exactly at rest
-  const fresh = shots.mode === 'tour' && i === 0 && !shots.seen;
+  // so does the view a flight into a room lands on: it fades in on the frame the camera reaches
+  const fresh = (shots.mode === 'tour' && i === 0 && !shots.seen) || shots.arrive;
+  shots.arrive = false;
   shots.seen = true;
   // views that change on their own are not read out; the ones the visitor asks for are
   el.cap.setAttribute('aria-live', tour.auto ? 'off' : 'polite');
   figs.forEach((f, ix) => {
     const on = ix === i;
-    f.style.transition = instant || reduced ? 'none' : `opacity ${XFADE}s cubic-bezier(.22,.61,.24,1)`;
+    f.style.transition = instant || reduced ? 'none' : `opacity ${XFADE}s ${SOFT}`;
     f.style.opacity = on ? 1 : 0;
     f.setAttribute('aria-hidden', String(!on));             // only the photograph on screen is announced
     if (on) tourMotion(f.querySelector('img'), ix, fresh, rest);
@@ -722,6 +725,7 @@ function shotShow(i, instant, rest) {
    seconds, then the next one fades in on its own. The zoom is the clock: the ring
    reads it, pausing it pauses both, and its end turns the page. */
 const DWELL = 6, XFADE = .8;                               // seconds on a view, crossfade to the next
+const SOFT = 'cubic-bezier(.45,0,.55,1)', DIVE = 2.1;      // crossfade curve, seconds of a flight into a room
 const tour = { anim: null, hold: new Set(), paused: false, auto: false, raf: 0, n: -1 };
 const tourOn = () => (state === 'inside' || state === 'room') && !reduced;
 function tourMotion(img, ix, fresh, rest) {
@@ -1002,34 +1006,49 @@ async function openRoom(x) {
   setState('moving');
   shotsBuild(list, 'room');
   const ready = decodeImg(fillShot(i).querySelector('img'));
+  let shown = false, decoded = false;
+  ready.then(() => { decoded = true; });
+  const reveal = () => {
+    if (shown) return;
+    shown = true;
+    void el.photos.offsetWidth;
+    show(el.photos);
+    shots.arrive = true;
+    shotShow(i);
+  };
   if (viewer && viewer.mode === '3d' && !reduced) {
-    try { pendingDive = viewer.v.dive(list[i].id); await pendingDive; } catch (e) {}
+    // one move: the photograph starts fading in while the camera slows, and is whole as it arrives
+    const at = 1 - (XFADE + .05) / DIVE;
+    try { pendingDive = viewer.v.dive(list[i].id, DIVE * 1000, t => { if (decoded && t >= at) reveal(); }); await pendingDive; } catch (e) {}
   }
   await ready;
-  void el.photos.offsetWidth;
-  show(el.photos);
-  shotShow(i);
+  reveal();
   setBusy(false);
   setState('room');
 }
 function roomGo(j) {
   shotShow(j);
   const s = shots.list[j];
-  // the camera follows behind the photograph, so the way back starts in this room
-  if (viewer && viewer.mode === '3d' && !reduced) {
-    const v = viewer.v;
-    pendingDive = Promise.resolve(pendingDive).catch(() => {}).then(() => v.dive(s.id)).catch(() => {});
-  }
+  // the camera goes to this room behind the opaque photographs, so the way back starts here
+  if (viewer && viewer.mode === '3d' && !reduced) pendingDive = viewer.v.dive(s.id, 0).catch(() => {});
 }
 async function backToPlan() {
   if (busy || state !== 'room') return;
   setBusy(true);
   setState('moving');
-  await fade(el.photos, 0, .6);
+  const three = viewer && viewer.mode === '3d';
+  if (three) { try { await pendingDive; } catch (e) {} }
+  if (three && !reduced) {
+    // the photograph settles on the room's own framing and dissolves as the camera starts to lift
+    const f = $$('.shot', el.photos)[shots.i], img = f && f.querySelector('img');
+    if (img) img.animate([{ transform: getComputedStyle(img).transform }, { transform: 'translateX(0px) scale(1)' }], { duration: XFADE * 1000, easing: SOFT, fill: 'forwards' });
+    await Promise.all([viewer.v.frame(true).catch(() => {}), fade(el.photos, 0, XFADE, smooth)]);
+  } else {
+    await fade(el.photos, 0, .6);
+    if (three) { try { await viewer.v.frame(false); } catch (e) {} }
+  }
   el.photos.innerHTML = '';
-  if (viewer && viewer.mode === '3d') {
-    try { await pendingDive; } catch (e) {}
-    try { await viewer.v.frame(!reduced); } catch (e) {}
+  if (three) {
     const lv = viewer.v.level || 0;
     if (lv !== planLevel) { planLevel = lv; markToggle(); fillRooms(); }
   }

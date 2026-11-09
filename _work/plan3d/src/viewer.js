@@ -14,6 +14,9 @@ import { M, setAnisotropy } from './materials.js';
 
 const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+// camera moves: zero speed and zero acceleration at both ends, a single peak in the middle
+const smoother = (t) => t * t * t * (t * (t * 6 - 15) + 10);
+const FLY = 2100;
 
 function nightBackdrop() {
   // a soft night sky with a distant line of city lights, seen through the windows
@@ -174,7 +177,14 @@ export function createViewer(container, opts = {}) {
       fit.center.y + dist * Math.cos(polar),
       fit.center.z + dist * Math.sin(polar) * Math.cos(azimuth),
     );
-    if (animate) return flyTo(pos, fit.center.clone(), 30, 900);
+    if (animate) {
+      // the walls take their overview state now, while the photograph still covers the model
+      const p = camera.position.clone(), l = controls.target.clone();
+      camera.position.copy(pos); controls.target.copy(fit.center);
+      updateCuts(true);
+      camera.position.copy(p); controls.target.copy(l);
+      return flyTo(pos, fit.center.clone(), 30, FLY);
+    }
     camera.position.copy(pos);
     controls.target.copy(fit.center);
     camera.fov = 30;
@@ -255,27 +265,33 @@ export function createViewer(container, opts = {}) {
   // mode: 'orbit' lets OrbitControls run, 'fly' during a tween, 'pose' at an eye level viewpoint
   let flight = 0;
   let mode = 'orbit';
-  function flyTo(pos, look, fov, dur = 1000, end = 'orbit') {
+  function flyTo(pos, look, fov, dur = FLY, end = 'orbit', onStep) {
     const my = ++flight;
     const p0 = camera.position.clone(), t0v = controls.target.clone(), f0 = camera.fov;
-    const start = performance.now();
     controls.enabled = false;
     mode = 'fly';
     return new Promise((res) => {
+      // the clock starts on the first frame and the first frames cannot jump ahead,
+      // so setting the move up never shows as a burst of speed at the start
+      let clock = 0, last = null, frames = 0;
       const step = (now) => {
         if (my !== flight) return res();
-        const t = Math.min(1, (now - start) / dur);
-        const k = ease(t);
+        if (last !== null) { const dt = now - last; clock += frames++ < 3 ? Math.min(dt, 34) : dt; }
+        last = now;
+        const t = dur > 0 ? Math.min(1, clock / dur) : 1;
+        const k = smoother(t);
         camera.position.lerpVectors(p0, pos, k);
         controls.target.lerpVectors(t0v, look, k);
         camera.fov = f0 + (fov - f0) * k;
         camera.updateProjectionMatrix();
         camera.lookAt(controls.target);
         renderNow();
+        if (onStep) onStep(t);
         if (t < 1) requestAnimationFrame(step);
         else {
           mode = end;
           if (end === 'orbit') { controls.enabled = true; controls.update(); }
+          updateCuts(true);
           renderNow();
           res();
         }
@@ -284,13 +300,15 @@ export function createViewer(container, opts = {}) {
     });
   }
 
-  function dive(photo, dur = 1150) {
+  function dive(photo, dur = FLY, onStep) {
     const p = model.poses[photo];
     if (!p) return Promise.resolve();
     if (p.level !== level && model.levels.length > 1) setLevel(p.level, false);
     // a vertical fov for the photo's 16:9 frame
-    const vf = (2 * Math.atan(Math.tan((p.fov * Math.PI) / 360) / (16 / 9)) * 180) / Math.PI;
-    return flyTo(p.eye.clone(), p.look.clone(), vf, dur, 'pose');
+    // (on a stage wider than 16:9 the photograph fills the width, so the width sets the frame)
+    const a = Math.max(camera.aspect || 16 / 9, 16 / 9);
+    const vf = (2 * Math.atan(Math.tan((p.fov * Math.PI) / 360) / a) * 180) / Math.PI;
+    return flyTo(p.eye.clone(), p.look.clone(), vf, dur, 'pose', onStep);
   }
 
   // interior mode: ceilings, lamps on, night outside (used for the guide renders)
@@ -410,7 +428,7 @@ export function createViewer(container, opts = {}) {
   const camDir = new THREE.Vector3();
   const CUT = 0.95;
   function updateCuts(snap = false) {
-    if (!model) return false;
+    if (!model || (mode === 'fly' && !snap)) return false;  // in flight only the camera moves
     camDir.subVectors(camera.position, controls.target);
     const high = camDir.y;
     camDir.y = 0;
