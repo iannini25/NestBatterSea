@@ -1,0 +1,392 @@
+// Nest Battersea | the two homes, transcribed from the official diagrammatic plans
+// (_refs/plantas-oficiais fp-31, fp-32 for LOFT 4 and fp-33 for Bungalow 3).
+// Every coordinate is in plan pixels of those 2000 x 1422 sheets, so each value can be
+// checked against the drawing. Scale bar: 0 m at x 1329, 5 m at x 1551 -> 44.4 px per metre.
+// Furniture sizes are in metres; rotation r is the direction the front faces:
+// 0 = plan down (+y), 180 = plan up, 90 = plan right (+x), -90 = plan left.
+//
+// walls   solid wall rectangles [x0, y0, x1, y1]; a wall line that holds doors is one rectangle
+//         and the doors are cut out of it, so the pieces, the header and the leaf move together.
+// doors   every door and opening the plan draws (a white leaf with a tick in the wall line, or a
+//         dashed track and arrow for a pocket door), as the opening rectangle o in the wall:
+//         k     'swing' (default), 'pocket', 'open' (no leaf), 'front' (entrance, closed, flush),
+//               'cupboard' (closed leaf, flush)
+//         hinge 'a' or 'b': the end of the opening with the hinges ('a' = the west or north end)
+//         side  '+' or '-': the side the leaf opens to ('+' = east for a wall running north south,
+//               south for a wall running east west), or the face a closed leaf is flush with
+//         ang   how far the leaf stands open, in degrees
+//         pocket 'a' or 'b': the end the sliding leaf disappears into
+// solids  wall prisms with a polygon footprint (the angled facade wall)
+// screens frameless glass shower screens, door: a hinged glass door at the 'a' end
+// fills   floor that belongs to no room (under the stair)
+
+export const PX_PER_M = 44.4;
+
+const LOFT4 = {
+  id: 'loft4',
+  name: 'LOFT 4',
+  floorToFloor: 3.2,
+  wallH: 2.75,
+  levels: [
+    {
+      id: 'lower',
+      label: 'Lower floor',
+      walls: [
+        // envelope and party walls
+        [990, 298, 1002, 573], [1002, 298, 1057, 329], [1057, 298, 1075, 329],
+        [1127, 317, 1132, 329], [1380, 488, 1399, 507], [1434, 488, 1447, 507],
+        [1447, 488, 1465, 791], [1149, 778, 1465, 791], [990, 559, 1163, 573],
+        [1149, 573, 1163, 778],
+        // utility row: the wall on the kitchen side, the service duct (a solid riser), the store
+        [1002, 502, 1169, 506], [1002, 506, 1020, 559], [1120, 506, 1125, 559], [1163, 506, 1168, 559],
+        // stair well: a wall towards the living room, and the under stair cupboard front on the hall
+        [1236, 502, 1321, 506], [1321, 502, 1325, 618], [1236, 614, 1321, 618], [1236, 502, 1240, 547],
+        // lobby, cloakroom and laundry between the hall and the bedroom suite
+        [1236, 614, 1240, 778], [1305, 614, 1309, 778], [1236, 662, 1447, 667],
+        [1267, 706, 1309, 711], [1267, 706, 1272, 729], [1236, 724, 1272, 729],
+        // dressing room and en suite, with the shower enclosure and its duct
+        [1376, 662, 1380, 778], [1430, 737, 1435, 778], [1435, 737, 1447, 778],
+        // bedroom north wall (the corner window sits between 1399 and 1434)
+        [1325, 502, 1380, 507],
+      ],
+      doors: [
+        { o: [1036, 502, 1076, 506], hinge: 'a', side: '+', ang: 90 },                  // kitchen to utility
+        { o: [1163, 513, 1168, 545], k: 'cupboard', hinge: 'a', side: '+' },            // hall to cloaks store, closed
+        { o: [1236, 507, 1240, 543], k: 'cupboard', hinge: 'b', side: '-' },            // under stair cupboard
+        { o: [1236, 621, 1240, 660], hinge: 'a', side: '+', ang: 90 },                  // hall to lobby
+        { o: [1305, 619, 1309, 659], hinge: 'a', side: '-', ang: 60 },                  // lobby to bedroom one
+        { o: [1240, 662, 1280, 667], hinge: 'a', side: '+', ang: 84, floor: 'stone' },  // lobby to cloakroom
+        { o: [1236, 733, 1240, 773], hinge: 'a', side: '+', ang: 90, floor: 'stone' },  // hall to laundry
+        { o: [1305, 715, 1309, 755], hinge: 'a', side: '-', ang: 45, floor: 'stone' },  // dressing room to laundry
+        { o: [1336, 662, 1376, 667], k: 'open' },                                        // bedroom to dressing room
+        { o: [1376, 696, 1380, 737], hinge: 'b', side: '+', ang: 90, floor: 'stone' },  // dressing room to en suite
+        { o: [1149, 724, 1163, 764], k: 'front', hinge: 'a', side: '+' },               // front door
+      ],
+      screens: [{ a: [1380, 737.5], b: [1430, 737.5], h: 2.0, door: true }],
+      glass: [
+        { a: [1075, 329], b: [1236, 329], h: 2.75 },
+        { a: [1236, 329], b: [1380, 329], h: 5.95, double: true },
+        { a: [1380, 329], b: [1380, 488], h: 5.95, double: true, open: { from: 0.30, to: 0.62 } },
+        { a: [1399, 505], b: [1434, 505], h: 2.75 },
+      ],
+      rooms: [
+        { id: 'living', name: 'Living room', poly: [[1236, 329], [1380, 329], [1380, 502], [1236, 502]], floor: 'oak', photo: 'loft4-living', more: ['loft4-living-2'], hot: [1300, 420], double: true },
+        { id: 'kitchen', name: 'Kitchen and dining', poly: [[1002, 329], [1236, 329], [1236, 502], [1002, 502]], floor: 'oak', photo: 'loft4-kitchen', more: ['loft4-kitchen-2'], hot: [1120, 420] },
+        { id: 'hall', name: 'Entrance hall', poly: [[1168, 502], [1236, 502], [1236, 778], [1163, 778], [1163, 559], [1168, 559]], floor: 'oak', photo: 'loft4-hall', hot: [1200, 650] },
+        { id: 'utility', name: 'Utility', poly: [[1020, 506], [1120, 506], [1120, 559], [1020, 559]], floor: 'stone' },
+        { id: 'store', name: 'Store', poly: [[1125, 506], [1163, 506], [1163, 559], [1125, 559]], floor: 'oak' },
+        { id: 'lobby', name: 'Lobby', poly: [[1240, 618], [1305, 618], [1305, 662], [1240, 662]], floor: 'oak' },
+        { id: 'cloak', name: 'Cloakroom', poly: [[1240, 667], [1305, 667], [1305, 706], [1267, 706], [1267, 724], [1240, 724]], floor: 'stone' },
+        { id: 'laundry', name: 'Laundry', poly: [[1272, 711], [1305, 711], [1305, 778], [1240, 778], [1240, 729], [1272, 729]], floor: 'stone' },
+        { id: 'bed1', name: 'Bedroom one', poly: [[1325, 505], [1447, 505], [1447, 662], [1309, 662], [1309, 618], [1325, 618]], floor: 'oak', photo: 'loft4-bed1', hot: [1380, 585] },
+        { id: 'dress1', name: 'Dressing room', poly: [[1309, 667], [1376, 667], [1376, 778], [1309, 778]], floor: 'oak' },
+        { id: 'ensuite1', name: 'En suite', poly: [[1380, 667], [1447, 667], [1447, 778], [1380, 778]], floor: 'stone' },
+      ],
+      // the floor under the stair (the well between the flights is open to the hall)
+      // and the sill in the deep reveal of the corner window
+      fills: [
+        { poly: [[1236, 502], [1325, 502], [1325, 618], [1236, 618]], floor: 'oak' },
+        { poly: [[1399, 488], [1434, 488], [1434, 505], [1399, 505]], floor: 'sill' },
+      ],
+      stair: { box: [1236, 502, 1321, 618] },
+      furniture: [
+        // living room
+        { t: 'rug', at: [1307, 414], w: 3.0, d: 3.0, r: 0 },
+        { t: 'sofa', at: [1307.5, 349], w: 2.36, d: 0.88, r: 0 },
+        { t: 'sofa', at: [1307.5, 481], w: 2.36, d: 0.88, r: 180 },
+        { t: 'coffeeRound', at: [1307, 414], dia: 1.05 },
+        { t: 'bench', at: [1372, 415], w: 1.7, d: 0.32, r: -90 },
+        { t: 'plantTall', at: [1238, 350], dia: 0.5, h: 1.9 },
+        { t: 'floorLamp', at: [1250, 492] },
+        { t: 'art', at: [1290, 506], w: 1.5, h: 1.05, r: 0, y: 1.25, tone: 0 },
+        // dining and kitchen
+        { t: 'diningTable', at: [1177.5, 412.5], w: 2.2, d: 0.92, r: 90 },
+        { t: 'chair', at: [1149, 381], r: 90 }, { t: 'chair', at: [1149, 413], r: 90 }, { t: 'chair', at: [1149, 445], r: 90 },
+        { t: 'chair', at: [1206, 381], r: -90 }, { t: 'chair', at: [1206, 413], r: -90 }, { t: 'chair', at: [1206, 445], r: -90 },
+        { t: 'chair', at: [1177.5, 351], r: 0 }, { t: 'chair', at: [1177.5, 474], r: 180 },
+        { t: 'pendantLinear', at: [1177.5, 412.5], w: 1.6, r: 90, interior: true },
+        { t: 'island', at: [1089, 416], w: 1.8, d: 0.9, r: 90 },
+        { t: 'stool', at: [1117, 397], r: -90 }, { t: 'stool', at: [1117, 435], r: -90 },
+        { t: 'kitchenRun', a: [1002, 329], len: 3.62, depth: 0.62, r: 90, tall: 0.85, sinkAt: 1.25, hobAt: 2.55, wallUnits: true },
+        // hall, utility, store
+        { t: 'console', at: [1177, 640], w: 1.5, d: 0.32, r: 90 },
+        { t: 'plantSmall', at: [1179, 604] },
+        { t: 'utility', at: [1080, 545.5], w: 1.8, d: 0.6, r: 180 },
+        { t: 'wardrobe', at: [1137, 532], w: 1.0, d: 0.55, r: 90 },
+        // bedroom one, dressing room, cloakroom, laundry, en suite
+        { t: 'rug', at: [1395, 584], w: 2.6, d: 2.8, r: 0 },
+        { t: 'bed', at: [1402.5, 584], w: 1.85, d: 2.05, r: -90, throw: 'sage' },
+        { t: 'nightstand', at: [1438, 534], r: -90 }, { t: 'nightstand', at: [1438, 634], r: -90 },
+        { t: 'armchair', at: [1340, 530], r: 135 },
+        { t: 'art', at: [1328, 584], w: 1.1, h: 0.8, r: 90, y: 1.2, tone: 1 },
+        { t: 'dressing', box: [1309, 667, 1376, 778], sides: [{ s: 'w', a: 667, b: 711 }, 's'] },
+        { t: 'wc', at: [1278.5, 687], r: -90 },
+        { t: 'boxing', box: [1294, 667, 1305, 706], h: 1.1 },
+        { t: 'vanity', at: [1253.5, 715], w: 0.6, d: 0.4, r: 180 },
+        { t: 'washer', at: [1256, 761], r: 0 },
+        { t: 'wc', at: [1415.5, 684], r: -90 },
+        { t: 'boxing', box: [1431, 667, 1447, 697], h: 1.1, mat: 'oak' },
+        { t: 'vanity', at: [1439, 717], w: 0.9, d: 0.36, r: -90 },
+        { t: 'shower', box: [1380, 738, 1430, 778], screen: null, riser: 'e' },
+      ],
+    },
+    {
+      id: 'upper',
+      label: 'Upper floor',
+      walls: [
+        [990, 298, 1002, 573], [1057, 298, 1075, 329],
+        [1127, 317, 1131, 559],                         // bedroom two / bedroom three, door to the lobby
+        [1002, 475, 1087, 480], [1083, 475, 1087, 559], // bedroom two, dressing room, door
+        [1002, 512, 1020, 559],                         // service duct, a solid riser
+        [990, 559, 1149, 573], [1149, 559, 1163, 778],
+        [1131, 502, 1236, 507],                         // bedroom three, door to the landing
+        [1321, 502, 1325, 618], [1236, 614, 1321, 618],
+        [1305, 614, 1309, 778],                         // landing / principal bedroom, door
+        [1163, 662, 1447, 667],                         // store, bathroom, dressing room, en suite
+        [1225, 667, 1229, 778], [1376, 662, 1380, 778], [1430, 737, 1435, 778], [1435, 737, 1447, 778],
+        [1149, 778, 1465, 791], [1447, 488, 1465, 791], [1380, 488, 1399, 507], [1434, 488, 1447, 507],
+        [1325, 502, 1380, 507],
+      ],
+      doors: [
+        { o: [1127, 506, 1131, 547], hinge: 'b', side: '-', ang: 90 },                  // landing to bedroom two lobby
+        { o: [1083, 506, 1087, 547], hinge: 'b', side: '-', ang: 68 },                  // lobby to dressing room
+        { o: [1158, 502, 1198, 507], hinge: 'a', side: '-', ang: 90 },                  // landing to bedroom three
+        { o: [1305, 619, 1309, 659], hinge: 'a', side: '-', ang: 90 },                  // landing to principal bedroom
+        { o: [1185, 662, 1224, 667], hinge: 'b', side: '+', ang: 90 },                  // landing to store
+        { o: [1241, 662, 1280, 667], hinge: 'a', side: '-', ang: 90, floor: 'stone' },  // landing to bathroom
+        { o: [1336, 662, 1376, 667], k: 'open' },                                        // bedroom to dressing room
+        { o: [1376, 697, 1380, 737], hinge: 'b', side: '+', ang: 90, floor: 'stone' },  // dressing room to en suite
+      ],
+      screens: [{ a: [1380, 737.5], b: [1430, 737.5], h: 2.0, door: true }],
+      glass: [
+        { a: [1002, 298], b: [1057, 298], h: 2.75 },
+        { a: [1075, 329], b: [1127, 329], h: 2.75 },
+        { a: [1131, 329], b: [1228, 329], h: 2.75 },
+        { a: [1399, 505], b: [1434, 505], h: 2.75 },
+        // glass guard behind the timber fins and around the stair opening
+        { a: [1228, 329], b: [1228, 502], h: 2.75, inner: true },
+      ],
+      rails: [
+        { a: [1236, 502], b: [1321, 502] },
+        { a: [1236, 545], b: [1236, 614] },
+      ],
+      // the corner window sill, and the slab edge that carries the glass rail over the living room
+      fills: [
+        { poly: [[1399, 488], [1434, 488], [1434, 505], [1399, 505]], floor: 'sill' },
+        { poly: [[1236, 502], [1321, 502], [1321, 506], [1236, 506]], floor: 'oak' },
+      ],
+      fins: { x: 1232, y0: 333, y1: 498, n: 9 },
+      void: [[1228, 329], [1380, 329], [1380, 502], [1228, 502]],
+      rooms: [
+        { id: 'bed2', name: 'Bedroom two', poly: [[1002, 298], [1057, 298], [1057, 329], [1127, 329], [1127, 475], [1002, 475]], floor: 'oak', photo: 'loft4-bed2', hot: [1060, 410] },
+        { id: 'dress2', name: 'Dressing room', poly: [[1002, 480], [1083, 480], [1083, 559], [1020, 559], [1020, 512], [1002, 512]], floor: 'oak' },
+        { id: 'lobby2', name: 'Lobby', poly: [[1087, 475], [1127, 475], [1127, 559], [1087, 559]], floor: 'oak' },
+        { id: 'bed3', name: 'Bedroom three', poly: [[1131, 329], [1228, 329], [1228, 502], [1131, 502]], floor: 'oak', photo: 'loft4-bed3', hot: [1180, 430] },
+        { id: 'landing', name: 'Gallery landing', poly: [[1131, 507], [1236, 507], [1236, 618], [1305, 618], [1305, 662], [1163, 662], [1163, 559], [1131, 559]], floor: 'oak', photo: 'loft4-gallery', hot: [1190, 590] },
+        { id: 'bed4', name: 'Principal bedroom', poly: [[1325, 505], [1447, 505], [1447, 662], [1309, 662], [1309, 618], [1325, 618]], floor: 'oak', photo: 'loft4-bed4', more: ['loft4-bed4-2'], hot: [1380, 585] },
+        { id: 'store2', name: 'Store', poly: [[1163, 667], [1225, 667], [1225, 778], [1163, 778]], floor: 'oak' },
+        { id: 'bath', name: 'Bathroom', poly: [[1229, 667], [1305, 667], [1305, 778], [1229, 778]], floor: 'stone', photo: 'loft4-bath', hot: [1265, 722] },
+        { id: 'dress4', name: 'Dressing room', poly: [[1309, 667], [1376, 667], [1376, 778], [1309, 778]], floor: 'oak' },
+        { id: 'ensuite4', name: 'En suite', poly: [[1380, 667], [1447, 667], [1447, 778], [1380, 778]], floor: 'stone' },
+      ],
+      furniture: [
+        // bedroom two
+        { t: 'rug', at: [1055, 402], w: 2.4, d: 2.6, r: 90 },
+        { t: 'bed', at: [1047.5, 402], w: 1.8, d: 2.05, r: 90 },
+        { t: 'nightstand', at: [1011, 352], r: 90 }, { t: 'nightstand', at: [1011, 452], r: 90 },
+        { t: 'armchair', at: [1030, 318], r: 160 },
+        { t: 'dressing', box: [1020, 480, 1083, 559], sides: ['n', 'w'] },
+        // bedroom three, with the timber fins over the double height living room
+        { t: 'bed', at: [1152, 374], w: 0.95, d: 2.0, r: 0, single: true },
+        { t: 'nightstand', at: [1186, 340], r: 0 },
+        { t: 'desk', at: [1217, 372], w: 1.3, d: 0.5, r: -90 },
+        { t: 'deskChair', at: [1199, 372], r: 90 },
+        { t: 'wardrobe', at: [1145, 478], w: 1.05, d: 0.6, r: 90 },
+        // landing
+        { t: 'bench', at: [1140, 535], w: 1.2, d: 0.38, r: 90 },
+        { t: 'plantSmall', at: [1200, 640] },
+        // principal bedroom
+        { t: 'rug', at: [1395, 584], w: 2.6, d: 2.8, r: 0 },
+        { t: 'bed', at: [1402.5, 584], w: 1.85, d: 2.05, r: -90 },
+        { t: 'nightstand', at: [1438, 534], r: -90 }, { t: 'nightstand', at: [1438, 634], r: -90 },
+        { t: 'armchair', at: [1340, 530], r: 135 },
+        { t: 'dressing', box: [1309, 667, 1376, 778], sides: ['w', 's'] },
+        // store, bathroom, en suite
+        { t: 'shelves', box: [1163, 667, 1225, 778], side: 's' },
+        { t: 'bath', at: [1290, 705], w: 1.55, d: 0.72, r: -90 },
+        { t: 'wc', at: [1245, 705], r: 90 },
+        { t: 'vanity', at: [1262, 766], w: 1.1, d: 0.45, r: 180 },
+        { t: 'wc', at: [1415.5, 684], r: -90 },
+        { t: 'boxing', box: [1431, 667, 1447, 697], h: 1.1, mat: 'oak' },
+        { t: 'vanity', at: [1439, 717], w: 0.9, d: 0.36, r: -90 },
+        { t: 'shower', box: [1380, 738, 1430, 778], screen: null, riser: 'e' },
+      ],
+    },
+  ],
+  facadeEdge: [[[1075, 280], [1465, 280]], [[1465, 280], [1465, 488]]],
+  // the full height solid wall south of the garden (the dark strip of the official render)
+  cladding: [[1465, 488, 1470, 796, 6.6], [1399, 488, 1470, 507, 6.6]],
+  exterior: {
+    planting: [[[1075, 280], [1465, 280], [1465, 488], [1398, 488], [1398, 312], [1075, 312]]],
+    paving: [[[1075, 312], [1398, 312], [1398, 488], [1380, 488], [1380, 329], [1075, 329]]],
+    rail: [[1075, 280], [1465, 280], [1465, 488]],
+    trees: [{ at: [1433, 462], h: 2.7 }, { at: [1340, 296], h: 1.5, shrub: true }, { at: [1180, 296], h: 1.3, shrub: true }],
+  },
+  // camera poses for the room photographs and for the dive into a room
+  // (eye height in metres above that floor, target point in plan px with its height)
+  poses: {
+    'loft4-living': { level: 'lower', eye: [1368, 418, 1.5], look: [1120, 430, 2.05], fov: 66 },
+    'loft4-arrive': { level: 'lower', eye: [1880, 404, 3.0], look: [1380, 404, 3.0], fov: 56 },
+    'loft4-kitchen': { level: 'lower', eye: [1040, 478, 1.55], look: [1330, 360, 1.7], fov: 62 },
+    'loft4-bed1': { level: 'lower', eye: [1314, 655, 1.6], look: [1447, 560, 0.85], fov: 74 },
+    'loft4-shower': { level: 'lower', eye: [1205, 752, 1.6], look: [1305, 745, 1.0], fov: 74 },
+    'loft4-ensuite': { level: 'upper', eye: [1383, 716, 1.6], look: [1447, 716, 1.0], fov: 88 },
+    'loft4-hall': { level: 'lower', eye: [1200, 768, 1.6], look: [1200, 430, 1.35], fov: 66 },
+    'loft4-living-2': { level: 'lower', eye: [1262, 496, 1.3], look: [1330, 329, 2.15], fov: 84 },
+    'loft4-kitchen-2': { level: 'lower', eye: [1158, 486, 1.55], look: [1040, 380, 0.95], fov: 72 },
+    'loft4-bed1-2': { level: 'lower', eye: [1440, 522, 1.55], look: [1330, 600, 1.2], fov: 74 },
+    'loft4-bed3-2': { level: 'upper', eye: [1212, 478, 1.55], look: [1138, 336, 0.95], fov: 76 },
+    'loft4-bed4-2': { level: 'upper', eye: [1425, 655, 1.55], look: [1405, 505, 1.15], fov: 76 },
+    'loft4-gallery': { level: 'upper', eye: [1231, 566, 1.7], look: [1380, 392, -0.7], fov: 80 },
+    'loft4-bed2': { level: 'upper', eye: [1120, 470, 1.6], look: [1002, 372, 0.85], fov: 74 },
+    'loft4-bed3': { level: 'upper', eye: [1176, 498, 1.6], look: [1196, 329, 1.25], fov: 74 },
+    'loft4-bed4': { level: 'upper', eye: [1314, 655, 1.6], look: [1447, 590, 0.85], fov: 74 },
+    'loft4-bath': { level: 'upper', eye: [1252, 669, 1.65], look: [1278, 778, 0.85], fov: 82 },
+  },
+};
+
+const BUNG3 = {
+  id: 'bung3',
+  name: 'Bungalow 3',
+  floorToFloor: 3.2,
+  wallH: 2.75,
+  levels: [
+    {
+      id: 'main',
+      label: 'Floor plan',
+      walls: [
+        // facade piers between the windows, and the alcove in the principal bedroom
+        [622, 298, 640, 327], [640, 298, 693, 327], [693, 298, 719, 327], [719, 298, 738, 327],
+        [795, 310, 867, 327], [943, 285, 962, 327], [962, 285, 988, 297],
+        // party wall and core
+        [988, 285, 1000, 560], [680, 550, 1000, 560], [489, 550, 607, 557],
+        // kitchen and bedrooms: one wall line along the corridor with the bedroom door and the suite opening
+        [719, 327, 725, 463], [837, 327, 840, 463], [693, 462, 988, 467],
+        // bathrooms: one wall line with two pocket doors, the partitions, the WC and shower cubicle
+        [675, 505, 913, 512], [782, 511, 787, 552], [868, 511, 873, 552], [675, 505, 680, 653],
+        // utility, store, hall and front door
+        [555, 556, 560, 641], [603, 556, 608, 641], [505, 640, 680, 653],
+      ],
+      // the facade turns at an angle along the utility, continuing the garden edge
+      solids: [{ poly: [[463.5, 550], [490, 550], [490, 566], [529.6, 653], [511, 653]] }],
+      doors: [
+        { o: [693, 467, 697, 505], hinge: 'a', side: '+', ang: 90 },                  // living room to bedroom corridor
+        { o: [769, 462, 808, 467], hinge: 'b', side: '-', ang: 86 },                  // corridor to bedroom two
+        { o: [867, 462, 908, 467], k: 'open' },                                        // suite lobby to principal bedroom
+        { o: [844, 467, 848, 505], hinge: 'a', side: '-', ang: 90 },                  // corridor to the suite lobby
+        { o: [909, 467, 913, 505], hinge: 'b', side: '-', ang: 90, floor: 'stone' },  // suite lobby to en suite
+        { o: [720, 505, 759, 512], k: 'pocket', pocket: 'b', floor: 'stone' },        // corridor to bathroom
+        { o: [804, 505, 843, 512], k: 'pocket', pocket: 'b', floor: 'stone' },        // corridor to WC
+        { o: [555, 584, 560, 625], hinge: 'b', side: '+', ang: 90, floor: 'stone' },  // store to utility
+        { o: [603, 584, 608, 625], hinge: 'a', side: '-', ang: 90 },                  // hall to store
+        { o: [620, 640, 665, 653], k: 'front', hinge: 'b', side: '-' },               // front door
+      ],
+      screens: [{ a: [912, 512], b: [912, 552], h: 2.0, door: true }],
+      glass: [
+        { a: [490, 327], b: [622, 327], h: 2.75, open: { from: 0.38, to: 0.72 } },
+        { a: [490, 327], b: [490, 550], h: 2.75, slider: { from: 0.58, to: 0.86 } },
+        { a: [738, 327], b: [795, 327], h: 2.75 },
+        { a: [867, 327], b: [943, 327], h: 2.75 },
+      ],
+      rooms: [
+        { id: 'living', name: 'Living and dining', poly: [[490, 327], [640, 327], [640, 480], [693, 480], [693, 505], [675, 505], [675, 550], [490, 550]], floor: 'oak', photo: 'bung3-living', more: ['bung3-living-2'], hot: [560, 440] },
+        { id: 'kitchen', name: 'Kitchen', poly: [[640, 327], [719, 327], [719, 462], [693, 462], [693, 480], [640, 480]], floor: 'oak', photo: 'bung3-kitchen', hot: [680, 400], join: 'living' },
+        { id: 'bed2', name: 'Bedroom two', poly: [[725, 327], [837, 327], [837, 462], [725, 462]], floor: 'oak', photo: 'bung3-bed2', hot: [775, 410] },
+        { id: 'bed1', name: 'Principal bedroom', poly: [[840, 327], [962, 327], [962, 297], [988, 297], [988, 462], [840, 462]], floor: 'oak', photo: 'bung3-bed1', hot: [915, 400] },
+        { id: 'corridor', name: 'Corridor', poly: [[697, 467], [844, 467], [844, 505], [697, 505]], floor: 'oak' },
+        { id: 'lobby', name: 'Lobby', poly: [[848, 467], [909, 467], [909, 505], [848, 505]], floor: 'oak' },
+        { id: 'bath', name: 'Bathroom', poly: [[680, 512], [782, 512], [782, 550], [680, 550]], floor: 'stone' },
+        { id: 'wc', name: 'WC', poly: [[787, 512], [868, 512], [868, 550], [787, 550]], floor: 'stone' },
+        { id: 'garden', name: 'Private garden', poly: [[337, 280], [622, 280], [622, 327], [490, 327], [490, 550], [473, 550], [473, 532]], floor: 'none', exterior: true, photo: 'bung3-garden', more: ['bung3-terrace'], hot: [430, 330] },
+        { id: 'ensuite', name: 'Bathroom', poly: [[913, 467], [988, 467], [988, 550], [873, 550], [873, 512], [913, 512]], floor: 'stone', photo: 'bung3-ensuite', hot: [950, 505] },
+        { id: 'utility', name: 'Utility', poly: [[490, 557], [555, 557], [555, 640], [523.6, 640], [490, 566]], floor: 'stone' },
+        { id: 'store', name: 'Store', poly: [[560, 557], [603, 557], [603, 640], [560, 640]], floor: 'oak' },
+        { id: 'hall', name: 'Entrance hall', poly: [[607, 550], [675, 550], [675, 640], [607, 640]], floor: 'oak' },
+      ],
+      furniture: [
+        { t: 'diningTable', at: [557.5, 372.5], w: 1.8, d: 0.85, r: 0 },
+        { t: 'chair', at: [541, 344], r: 0 }, { t: 'chair', at: [576, 344], r: 0 },
+        { t: 'chair', at: [541, 401], r: 180 }, { t: 'chair', at: [576, 401], r: 180 },
+        { t: 'pendantRound', at: [557.5, 372.5], interior: true },
+        { t: 'rug', at: [563, 465], w: 2.3, d: 2.2, r: 0 },
+        { t: 'sofa', at: [616, 462.5], w: 1.62, d: 0.86, r: -90 },
+        { t: 'sofa', at: [566.5, 528], w: 1.7, d: 0.86, r: 180 },
+        { t: 'coffeeRound', at: [558, 462], dia: 0.85 },
+        { t: 'console', at: [498, 448], w: 1.2, d: 0.34, r: 90 },
+        { t: 'plantTall', at: [512, 518], dia: 0.45, h: 1.6 },
+        { t: 'floorLamp', at: [640, 520] },
+        { t: 'art', at: [548, 547], w: 1.4, h: 1.0, r: 180, y: 1.2, tone: 1 },
+        { t: 'kitchenRun', a: [719, 327], len: 3.04, depth: 0.6, r: -90, hobAt: 0.45, sinkAt: 1.75, tall: 0, wallUnits: true },
+        // bedroom two
+        { t: 'bed', at: [745, 373], w: 0.95, d: 2.0, r: 0, single: true },
+        { t: 'nightstand', at: [775, 336], r: 0 },
+        { t: 'wardrobe', at: [822.5, 395], w: 2.9, d: 0.62, r: -90 },
+        { t: 'deskChair', at: [785, 440], r: 0 },
+        // principal bedroom
+        { t: 'rug', at: [930, 395], w: 2.2, d: 2.4, r: 0 },
+        { t: 'bed', at: [944, 395], w: 1.5, d: 2.0, r: -90 },
+        { t: 'nightstand', at: [981, 350], r: -90 }, { t: 'nightstand', at: [981, 440], r: -90 },
+        { t: 'wardrobe', at: [853.5, 395], w: 2.9, d: 0.6, r: 90 },
+        // bathroom: walk in shower at the west end, basin on the east wall
+        { t: 'shower', box: [680, 512, 721, 552], screen: 'e', riser: 'w' },
+        { t: 'vanity', at: [773, 532], w: 0.85, d: 0.4, r: -90 },
+        // WC: basin on the west wall, WC against the cubicle partition
+        { t: 'vanity', at: [796, 532], w: 0.85, d: 0.4, r: 90 },
+        { t: 'wc', at: [841.5, 532], r: -90 },
+        { t: 'boxing', box: [857, 512, 868, 550], h: 1.1 },
+        // en suite: the walk in shower cubicle of the plan, and the fittings of the photograph
+        { t: 'shower', box: [873, 512, 911, 552], screen: null, riser: 'w' },
+        { t: 'wc', at: [972, 485], r: -90 },
+        { t: 'vanity', at: [928, 477], w: 0.7, d: 0.4, r: 0 },
+        { t: 'shower', box: [940, 515, 988, 550], screen: 'n' },
+        // utility, store, hall
+        { t: 'utility', at: [527, 572], w: 1.25, d: 0.6, r: 0 },
+        { t: 'wardrobe', at: [581.5, 568.5], w: 0.95, d: 0.5, r: 0 },
+        { t: 'console', at: [669, 600], w: 1.0, d: 0.3, r: -90 },
+      ],
+    },
+  ],
+  facadeEdge: [[[473, 550], [337, 280]], [[337, 280], [622, 280]], [[738, 280], [943, 280]]],
+  cladding: [[622, 276, 738, 300, 3.5], [795, 276, 867, 300, 3.5], [943, 276, 988, 300, 3.5]],
+  exterior: {
+    planting: [
+      [[337, 280], [473, 280], [473, 532]],
+      [[473, 280], [622, 280], [622, 306], [473, 306]],
+      [[738, 280], [943, 280], [943, 306], [738, 306]],
+    ],
+    paving: [
+      [[473, 306], [622, 306], [622, 327], [490, 327], [490, 550], [473, 550], [473, 532]],
+      [[738, 306], [795, 306], [795, 327], [738, 327]],
+      [[867, 306], [943, 306], [943, 327], [867, 327]],
+    ],
+    rail: [[473, 550], [337, 280], [622, 280]],
+    rail2: [[738, 280], [943, 280]],
+    trees: [{ at: [428, 392], h: 2.4 }, { at: [455, 486], h: 1.3, shrub: true }, { at: [560, 293], h: 1.2, shrub: true }],
+  },
+  poses: {
+    'bung3-living': { level: 'main', eye: [566, 340, 1.5], look: [500, 600, 1.0], fov: 70 },
+    'bung3-arrive': { level: 'main', eye: [562, 40, 1.6], look: [562, 327, 1.6], fov: 56 },
+    'bung3-kitchen': { level: 'main', eye: [560, 520, 1.55], look: [705, 360, 1.25], fov: 62 },
+    'bung3-bed2': { level: 'main', eye: [800, 458, 1.6], look: [735, 330, 0.85], fov: 74 },
+    'bung3-bed1': { level: 'main', eye: [870, 458, 1.6], look: [988, 372, 0.85], fov: 74 },
+    'bung3-bath': { level: 'main', eye: [733, 478, 1.65], look: [737, 550, 0.7], fov: 90 },
+    'bung3-ensuite': { level: 'main', eye: [916, 543, 1.6], look: [985, 470, 0.95], fov: 86 },
+    'bung3-garden': { level: 'main', eye: [515, 460, 1.5], look: [350, 420, 1.2], fov: 70 },
+    'bung3-terrace': { level: 'main', eye: [362, 289, 1.6], look: [560, 440, 1.2], fov: 70 },
+    'bung3-living-2': { level: 'main', eye: [680, 470, 1.5], look: [490, 420, 1.15], fov: 74 },
+    'bung3-bed1-2': { level: 'main', eye: [962, 455, 1.55], look: [905, 327, 1.2], fov: 76 },
+    'bung3-bed2-2': { level: 'main', eye: [748, 452, 1.55], look: [812, 330, 1.1], fov: 76 },
+  },
+};
+
+export const APARTMENTS = { loft4: LOFT4, bung3: BUNG3 };

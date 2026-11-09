@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Nest Battersea | The neighbourhood map</title>
+<meta name="description" content="Nest Battersea at 38 Lombard Road, London SW11, and the places around it: the river, stations, parks, shops, schools and bridges, with the walk and the drive to each.">
+<meta name="theme-color" content="#0f1116">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Nest Battersea">
+<meta property="og:title" content="Nest Battersea | The neighbourhood map">
+<meta property="og:description" content="The river, stations, parks, shops and schools around 38 Lombard Road, with the walk and the drive to each.">
+<meta property="og:image" content="assets/site/share.jpg">
+<meta property="og:locale" content="en_GB">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230f1116'/%3E%3Ctext x='16' y='21' font-family='Georgia' font-size='15' fill='%23f3efe8' text-anchor='middle'%3En%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin>
+<link rel="preload" as="fetch" href="assets/map/places.json?v=1" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&amp;display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.css" crossorigin="anonymous">
+<link rel="stylesheet" href="css/map.css?v=5">
+<script>document.documentElement.classList.add('js')</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js" crossorigin="anonymous" defer></script>
+<script src="js/map.js?v=3" defer></script>
+<script src="js/mappage.js?v=3" defer></script>
+</head>
+<body class="mp" data-mode="foot" data-look="night">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" id="i-back" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6l6 6"/></symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6l-6 6"/></symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" id="i-prev" viewBox="0 0 24 24"><path d="M14.5 5.5L8 12l6.5 6.5"/></symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" id="i-next" viewBox="0 0 24 24"><path d="M9.5 5.5L16 12l-6.5 6.5"/></symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" id="i-plus" viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13"/></symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" id="i-minus" viewBox="0 0 24 24"><path d="M5.5 12h13"/></symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" id="i-compass" viewBox="0 0 24 24"><path d="M12 3.5l3.2 8.5H8.8z" fill="currentColor" stroke="none"/><path d="M12 20.5l-3.2-8.5h6.4z" opacity=".45"/></symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" id="i-home" viewBox="0 0 24 24"><path d="M4.5 11L12 4.5l7.5 6.5M6.5 9.5v9.5h11V9.5M10 19v-5h4v5"/></symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" id="i-walk" viewBox="0 0 24 24"><circle cx="13" cy="4.6" r="1.7"/><path d="M10.2 21l2.1-6.2l2.7 2.6V21M8 11.4l2.6-3.1h3.1l2.1 3.6l2.4 1.1M12.6 8.4l-1.3 6.4M8.6 15.2l-1.6 3.2"/></symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" id="i-car" viewBox="0 0 24 24"><path d="M5 16.5V12l1.8-4.6a1.5 1.5 0 0 1 1.4-.9h7.6a1.5 1.5 0 0 1 1.4.9L19 12v4.5M5 12h14M4 16.5h16v2.2a.8.8 0 0 1-.8.8h-1.9a.8.8 0 0 1-.8-.8v-2.2M7.5 16.5v2.2a.8.8 0 0 1-.8.8H4.8a.8.8 0 0 1-.8-.8"/><circle cx="8" cy="14.2" r=".6" fill="currentColor"/><circle cx="16" cy="14.2" r=".6" fill="currentColor"/></symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" id="i-cube" viewBox="0 0 24 24"><path d="M12 3.5l7.5 4.2v8.6L12 20.5l-7.5-4.2V7.7zM4.5 7.7L12 12l7.5-4.3M12 12v8.5"/></symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.5M12 7.6v.1"/></symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" id="i-bridge" viewBox="0 0 24 24"><path d="M2.5 15.5h19M4 15.5c2.5-5 13.5-5 16 0M7 12.6v2.9M12 11.5v4M17 12.6v2.9M3 19c1.5 1 3 1 4.5 0s3-1 4.5 0s3 1 4.5 0s3-1 4.5 0"/></symbol>
+  <!-- category glyphs -->
+  <symbol fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" id="c-all" viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1.8"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.8"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.8"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.8"/></symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" id="c-river" viewBox="0 0 24 24"><path d="M3 9c1.5 1.2 3 1.2 4.5 0s3-1.2 4.5 0s3 1.2 4.5 0s3-1.2 4.5 0M3 15c1.5 1.2 3 1.2 4.5 0s3-1.2 4.5 0s3 1.2 4.5 0s3-1.2 4.5 0"/></symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" id="c-transport" viewBox="0 0 24 24"><rect x="6" y="3.5" width="12" height="13" rx="3"/><path d="M6 10.5h12M9 20.5l1.5-4M15 20.5l-1.5-4"/><circle cx="9.3" cy="13.6" r=".5" fill="currentColor"/><circle cx="14.7" cy="13.6" r=".5" fill="currentColor"/></symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" id="c-parks" viewBox="0 0 24 24"><path d="M12 21v-6M12 3.5c3.4 0 5.8 3 5.8 6.2c0 3-2.6 5.3-5.8 5.3s-5.8-2.3-5.8-5.3C6.2 6.5 8.6 3.5 12 3.5z"/><path d="M12 15l-2.6-2.4M12 12.5l2.4-2"/></symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" id="c-food" viewBox="0 0 24 24"><path d="M7 3.5v6.5a2 2 0 0 0 2 2v8.5M11 3.5v6.5a2 2 0 0 1-2 2M9 3.5v5M16.5 20.5V3.5c-2 1.2-3 3.6-3 6.5v3.5h3"/></symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" id="c-culture" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5.1l5.6.8l-4 4l.9 5.6L12 16.7l-5 2.6l.9-5.6l-4-4l5.6-.8z"/></symbol>
+  <symbol fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" id="c-everyday" viewBox="0 0 24 24"><path d="M3.5 9L12 4.5L20.5 9L12 13.5zM7 11v4.5c1.4 1.4 3.2 2 5 2s3.6-.6 5-2V11M20.5 9v5"/></symbol>
+</svg>
+
+<div class="mp-map" id="mpmap" role="region" aria-label="Interactive map of the neighbourhood around Nest Battersea. Scroll to zoom, drag to move."></div>
+<div class="mp-static" id="mpstatic" aria-hidden="true"><picture><source type="image/webp" srcset="assets/site/map/static-960.webp 960w, assets/site/map/static-1600.webp 1600w" sizes="100vw"><img src="assets/site/map/static-1600.jpg" width="1600" height="1000" alt="" decoding="async"></picture></div>
+<div class="mp-shade" aria-hidden="true"></div>
+
+<!-- top notches: the official logo back to the site, the view controls -->
+<header class="tl">
+  <a class="logo" href="index.html" aria-label="Nest Battersea, back to the site"><img src="assets/brand/logo-light.png" alt="Nest Battersea" width="300" height="150"></a>
+  <a class="back" href="index.html#location"><span class="bk-ic"><svg><use href="#i-back"/></svg></span><span class="bk-lbl">Back to the site</span></a>
+</header>
+<div class="tr">
+  <div class="seg looks" role="group" aria-label="Map style">
+    <button type="button" data-look="night" aria-pressed="true">Map</button>
+    <button type="button" data-look="sat" aria-pressed="false">Satellite</button>
+    <i class="seg-thumb" aria-hidden="true"></i>
+  </div>
+  <a class="reg" href="index.html#contact">Register interest</a>
+</div>
+
+<!-- the places -->
+<aside class="panel" id="panel" aria-label="Places around Nest Battersea">
+  <button type="button" class="grab" id="grab" aria-label="Show or hide the list of places"><i></i></button>
+  <div class="panel-head">
+    <p class="eyebrow">The neighbourhood</p>
+    <h1>Around Nest Battersea</h1>
+    <p class="sub">38 Lombard Road, on the Battersea bank. Choose a place to see the way there.</p>
+    <div class="seg modes" role="radiogroup" aria-label="Travel mode">
+      <button type="button" role="radio" data-mode="foot" aria-checked="true"><svg><use href="#i-walk"/></svg><span>Walk</span></button>
+      <button type="button" role="radio" data-mode="car" aria-checked="false"><svg><use href="#i-car"/></svg><span>Car</span></button>
+      <i class="seg-thumb" aria-hidden="true"></i>
+    </div>
+    <div class="chips-row"><div class="chips" id="chips" role="group" aria-label="Show places"></div><span class="chips-now" id="chipsnow" aria-hidden="true">All places</span></div>
+  </div>
+  <ol class="plist" id="plist" aria-live="off"></ol>
+</aside>
+
+<!-- the chosen place -->
+<article class="detail" id="detail" aria-live="polite" aria-label="The chosen place" hidden></article>
+
+<!-- map controls -->
+<div class="ctl" id="ctl">
+  <button type="button" class="circ sm" data-ctl="in" aria-label="Zoom in"><svg><use href="#i-plus"/></svg></button>
+  <button type="button" class="circ sm" data-ctl="out" aria-label="Zoom out"><svg><use href="#i-minus"/></svg></button>
+  <button type="button" class="circ sm" data-ctl="tilt" aria-label="Switch between 3D and flat" aria-pressed="true"><svg><use href="#i-cube"/></svg></button>
+  <button type="button" class="circ sm" data-ctl="north" aria-label="Face north"><svg class="needle"><use href="#i-compass"/></svg></button>
+  <button type="button" class="circ sm" data-ctl="home" aria-label="Back to Nest Battersea"><svg><use href="#i-target"/></svg></button>
+</div>
+
+<div class="hint" id="hint" aria-hidden="true">Scroll to zoom · drag to move · right drag to turn</div>
+
+<div class="overlay" id="credits" role="dialog" aria-modal="true" aria-label="Credits" hidden>
+  <div class="sheet">
+    <button type="button" class="x" data-close aria-label="Close"><svg><use href="#i-x"/></svg></button>
+    <p class="eyebrow">Credits</p>
+    <h2>Photographs and map data</h2>
+    <p class="fine">Photographs of the places are from Wikimedia Commons, each under the licence named beside it, resized for this page. Map data © OpenStreetMap contributors (ODbL). Vector tiles by OpenFreeMap. Satellite imagery © Esri, Maxar, Earthstar Geographics and the GIS User Community. Routes by OSRM on routing.openstreetmap.de (FOSSGIS), computed once and stored with the page.</p>
+    <ol class="credit-list" id="creditlist"></ol>
+  </div>
+</div>
+
+<noscript><p class="nojs">The interactive map needs JavaScript. <a href="index.html#location">Back to the site</a></p></noscript>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Nest Battersea — Sky Homes</title>
+<meta name="description" content="Nest Battersea. 34 storeys above the Thames at Lombard Road. Single and double height sky homes, each with its own planted garden in the air.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+<link rel="preload" as="image" href="assets/facade/tower-2k.jpg">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+</head>
+<body>
+
+<!-- ============ BOOT ============ -->
+<div id="boot">
+  <div class="in">
+    <div class="mk">nest</div>
+    <div class="mb">BATTERSEA</div>
+    <div class="track"><div class="fill"></div></div>
+    <div class="pc"><span id="pc">0</span>%</div>
+  </div>
+</div>
+
+<!-- ============ STAGE ============ -->
+<div id="stage">
+
+  <!-- 1. facade -->
+  <div class="layer" id="facade">
+    <div class="frame">
+      <img id="towerimg" src="assets/facade/tower-2k.jpg" alt="Nest Battersea seen across the River Thames at dusk">
+      <svg id="masks" viewBox="0 0 4096 2294" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <filter id="soft" x="-80%" y="-80%" width="260%" height="260%">
+            <feGaussianBlur stdDeviation="26"/>
+          </filter>
+        </defs>
+        <g id="hotspots"></g>
+      </svg>
+    </div>
+  </div>
+
+  <!-- 2. flight -->
+  <div class="layer" id="flight">
+    <video id="vid" playsinline muted preload="auto"></video>
+  </div>
+
+  <!-- 3. arrival still -->
+  <div class="layer" id="still"><img id="stillimg" alt=""></div>
+
+  <!-- 4. interiors -->
+  <div class="layer" id="gallery"></div>
+
+  <!-- 5. plan -->
+  <div class="layer" id="plan">
+    <div class="wrap">
+      <div class="stageview">
+        <div class="sheet" id="sheet">
+          <div class="glow"></div>
+          <img id="planimg" alt="Official diagrammatic floor plan">
+        </div>
+      </div>
+      <div class="meta">
+        <div class="kick mono">Diagrammatic floor plan</div>
+        <h3 id="plan-name">LOFT 4</h3>
+        <div class="sub" id="plan-sub">Double height sky home · Private 04</div>
+        <div class="rows" id="plan-rows"></div>
+        <div class="toggle" id="plan-toggle"></div>
+        <div class="src">Plan reproduced from the Nest Battersea design &amp; access documentation
+          (Wandsworth application 2025/0907). Areas as published, in square metres.
+          Drag the plan to rotate it.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="scrim"></div>
+<div id="grain"></div>
+
+<!-- ============ CHROME ============ -->
+<header class="bar" id="top">
+  <div class="mark" onclick="App.home()">
+    <span class="n">nest</span><span class="b">BATTERSEA</span>
+  </div>
+  <div class="spacer"></div>
+  <nav>
+    <button class="mono">The Building</button>
+    <button class="mono">Sky Homes</button>
+    <button class="mono">Gardens</button>
+    <button class="mono">Battersea</button>
+  </nav>
+</header>
+
+<div id="hero">
+  <div class="eyebrow mono">Lombard Road · SW11 · 34 storeys</div>
+  <h1>
+    <span class="ln"><i>Every home</i></span>
+    <span class="ln"><i>has a garden.</i></span>
+    <span class="ln"><i>Some are 100</i></span>
+    <span class="ln"><i>metres up.</i></span>
+  </h1>
+  <p>Single and double height sky homes stacked above the Thames. The lit windows are
+     the residences still available — choose one and come closer.</p>
+</div>
+
+<aside id="rail">
+  <div class="hd mono">Choose your residence</div>
+  <div id="railitems"></div>
+  <div class="note">Two of 143 homes shown. Nest Battersea is a build-to-rent
+     development currently in planning.</div>
+</aside>
+
+<footer class="bar" id="bot">
+  <div class="legend">
+    <div class="lg mono"><span class="pip on"></span>Available</div>
+    <div class="lg mono"><span class="pip off"></span>Let</div>
+  </div>
+  <div class="spacer"></div>
+  <button class="btn" onclick="App.enquire()">Register interest</button>
+</footer>
+
+<div id="tag"><div class="box"><div class="t"></div><div class="s mono"></div></div><div class="stem"></div></div>
+
+<button id="back" onclick="App.back()">
+  <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+  <span class="mono" id="backlbl">Back to the tower</span>
+</button>
+
+<aside id="panel">
+  <div class="kick mono" id="p-kick">Available</div>
+  <h2 id="p-name">LOFT 4</h2>
+  <div class="sub" id="p-sub">Double height sky home</div>
+  <div id="specs"></div>
+  <div class="acts">
+    <button class="btn ghost" onclick="App.plan()">Floor plan</button>
+    <button class="btn" onclick="App.inside()">Step inside</button>
+  </div>
+  <div class="fine" id="p-fine"></div>
+</aside>
+
+<div id="capbar">
+  <div class="cap">
+    <div class="ix mono"><span id="cap-i">01</span> / <span id="cap-n">04</span></div>
+    <div class="ti" id="cap-t">Living &amp; Kitchen</div>
+  </div>
+  <div class="spacer"></div>
+  <div class="nav">
+    <div id="dots"></div>
+    <button class="arw" onclick="App.shot(-1)" aria-label="Previous">
+      <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <button class="arw" onclick="App.shot(1)" aria-label="Next">
+      <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+  </div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

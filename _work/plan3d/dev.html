@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>plan3d dev</title>
+<style>
+html,body{margin:0;height:100%;background:#15171c;font-family:Poppins,system-ui,sans-serif}
+#v{position:fixed;inset:0}
+.p3-labels{position:absolute;inset:0;pointer-events:none}
+.p3-hot{position:absolute;left:0;top:0;pointer-events:auto;border:0;background:none;padding:0;cursor:pointer}
+.p3-hot i{display:block;width:12px;height:12px;border-radius:50%;background:#92b7ca;box-shadow:0 0 0 5px rgba(146,183,202,.28);margin:-6px 0 0 -6px}
+.p3-hot span{display:none;position:absolute;left:12px;top:-13px;white-space:nowrap;background:#161922;color:#fff;font:600 11px/1 Poppins,sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:6px 10px;border-radius:999px}
+.p3-hot.on span{display:block}
+</style>
+<script type="importmap">{"imports":{"three":"/_work/tools/npm3/node_modules/three/build/three.module.js","three/addons/":"/_work/tools/npm3/node_modules/three/examples/jsm/"}}</script>
+</head><body><div id="v"></div>
+<script type="module">
+import { createViewer } from './src/viewer.js';
+const q = new URLSearchParams(location.search);
+window.viewer = createViewer(document.getElementById('v'), { apt: q.get('apt') || 'loft4', capture: true, quality: q.get('q') || 'high', onRoom: (r) => console.log('room', r.id) });
+window.ready = true;
+</script></body></html>

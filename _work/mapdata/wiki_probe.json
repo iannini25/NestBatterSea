@@ -1,0 +1,303 @@
+{
+ "London Peace Pagoda": {
+  "lat": null,
+  "lon": null,
+  "image": null,
+  "desc": null,
+  "missing": true
+ },
+ "Battersea Park Children's Zoo": {
+  "lat": null,
+  "lon": null,
+  "image": null,
+  "desc": null,
+  "missing": true
+ },
+ "Albert Bridge, London": {
+  "lat": 51.4823,
+  "lon": -0.1667,
+  "image": "Albert_Bridge_from_Chelsea_Embankment.jpg",
+  "desc": "Bridge over the River Thames",
+  "missing": false
+ },
+ "Battersea Bridge": {
+  "lat": 51.48111111,
+  "lon": -0.1725,
+  "image": "Battersea_bridge_1.jpg",
+  "desc": "Bridge over the River Thames in London",
+  "missing": false
+ },
+ "Battersea Park": {
+  "lat": 51.4793,
+  "lon": -0.1573,
+  "image": "Southwest_View_of_the_Battersea_Park_Pagoda_(02).jpg",
+  "desc": "Green space in London, United Kingdom",
+  "missing": false
+ },
+ "Battersea Park railway station": {
+  "lat": 51.4779,
+  "lon": -0.1477,
+  "image": "2018_at_Battersea_Park_station_-_facade.JPG",
+  "desc": "National Rail station in London, England",
+  "missing": false
+ },
+ "Battersea Power Station": {
+  "lat": 51.48166667,
+  "lon": -0.14472222,
+  "image": "Battersea_Power_Station_from_the_river.jpg",
+  "desc": "Decommissioned coal-fired power station",
+  "missing": false
+ },
+ "Battersea Power Station tube station": {
+  "lat": null,
+  "lon": null,
+  "image": "Battersea_Power_Station_48.jpg",
+  "desc": "London Underground station",
+  "missing": false
+ },
+ "Chelsea Harbour": {
+  "lat": null,
+  "lon": null,
+  "image": "Chelsea_Harbour_-_geograph.org.uk_-_1526537.jpg",
+  "desc": "Mixed-use development in London, England",
+  "missing": false
+ },
+ "Clapham Common": {
+  "lat": 51.4578,
+  "lon": -0.1494,
+  "image": "Victorian_style_lamp_posts_on_the_way_to_Clapham_Common_Bandstand_-_geograph.org.uk_-_1514161.jpg",
+  "desc": "Urban park in Clapham, London, England",
+  "missing": false
+ },
+ "Clapham Junction railway station": {
+  "lat": 51.4642,
+  "lon": -0.1714,
+  "image": "Clapham_Junction_Railway_Station_South_Western_Entrance.jpg",
+  "desc": "Major railway station in London, England",
+  "missing": false
+ },
+ "Fulham Broadway tube station": {
+  "lat": null,
+  "lon": null,
+  "image": "FulhamBroadway1.jpg",
+  "desc": "London Underground station",
+  "missing": false
+ },
+ "Imperial Wharf railway station": {
+  "lat": 51.47517,
+  "lon": -0.18281,
+  "image": "Imperial_Wharf_stn_western_entrance2.JPG",
+  "desc": "London Overground station",
+  "missing": false
+ },
+ "London Heliport": {
+  "lat": 51.47,
+  "lon": -0.17944444,
+  "image": "London_Heliport_-_Battersea_-_London_-_2_helicopters_awaiting_takeoff_-_evening_-_030604.jpg",
+  "desc": "Airport in London, England",
+  "missing": false
+ },
+ "Northcote Road": {
+  "lat": null,
+  "lon": null,
+  "image": "Northcote_Road_SW11_(4)_-_geograph.org.uk_-_187108.jpg",
+  "desc": "Street in Battersea, London",
+  "missing": false
+ },
+ "St Mary's Church, Battersea": {
+  "lat": null,
+  "lon": null,
+  "image": "Church_of_Saint_Mary,_Battersea_(West_Face_-_01).jpg",
+  "desc": "Church in Greater London, England",
+  "missing": false
+ },
+ "Thames Path": {
+  "lat": null,
+  "lon": null,
+  "image": "Thames_Path_sign,_Thames_Barrier.jpg",
+  "desc": "National Trail following the River Thames in England",
+  "missing": false
+ },
+ "Wandsworth Bridge": {
+  "lat": null,
+  "lon": null,
+  "image": "Wandsworth_Bridge.JPG",
+  "desc": "Bridge in London, England",
+  "missing": false
+ },
+ "Wandsworth Common": {
+  "lat": null,
+  "lon": null,
+  "image": "Wandsworth_mill.jpg",
+  "desc": "Park in Wandsworth, London",
+  "missing": false
+ },
+ "Wandsworth Town railway station": {
+  "lat": 51.4609,
+  "lon": -0.1879,
+  "image": "Wandsworth_Town_Station_Platform.jpg",
+  "desc": "National Rail station in London, England",
+  "missing": false
+ },
+ "Latchmere Leisure Centre": {
+  "lat": null,
+  "lon": null,
+  "image": null,
+  "desc": null,
+  "missing": true
+ },
+ "Battersea Square": {
+  "lat": null,
+  "lon": null,
+  "image": null,
+  "desc": null,
+  "missing": true
+ },
+ "York Gardens": {
+  "lat": null,
+  "lon": null,
+  "image": null,
+  "desc": null,
+  "missing": true
+ },
+ "Plantation Wharf Pier": {
+  "lat": null,
+  "lon": null,
+  "image": null,
+  "desc": null,
+  "missing": true
+ },
+ "Falconbrook Primary School": {
+  "lat": null,
+  "lon": null,
+  "image": null,
+  "desc": null,
+  "missing": true
+ },
+ "Battersea Arts Centre": {
+  "lat": 51.4648,
+  "lon": -0.1607,
+  "image": "Battersea_Arts_Centre_09.JPG",
+  "desc": "Performance space in London, England",
+  "missing": false
+ },
+ "Battersea Railway Bridge": {
+  "lat": 51.47305556,
+  "lon": -0.17916667,
+  "image": "BatterseaRailBridge.jpg",
+  "desc": "Bridge across the River Thames in London",
+  "missing": false
+ },
+ "Chelsea Bridge": {
+  "lat": 51.48472222,
+  "lon": -0.15,
+  "image": "Chelsea_Bridge,_London.jpg",
+  "desc": "Bridge over the River Thames in west London",
+  "missing": false
+ },
+ "Chelsea Creek": {
+  "lat": 42.38361111,
+  "lon": -71.04333333,
+  "image": null,
+  "desc": "Waterway in the Boston area",
+  "missing": false
+ },
+ "Chelsea Physic Garden": {
+  "lat": null,
+  "lon": null,
+  "image": "II_Chelsea_Physic_Garden,_London,_UK.jpg",
+  "desc": "Botanical garden in Chelsea, London",
+  "missing": false
+ },
+ "Chelsea and Westminster Hospital": {
+  "lat": 51.484,
+  "lon": -0.182,
+  "image": "Chelsea_Westminster_Hospital_Front,_Fulham_Road.jpg",
+  "desc": "Hospital in London",
+  "missing": false
+ },
+ "Cremorne Gardens": {
+  "lat": null,
+  "lon": null,
+  "image": null,
+  "desc": "Topics referred to by the same term",
+  "missing": false
+ },
+ "Emanuel School": {
+  "lat": null,
+  "lon": null,
+  "image": null,
+  "desc": "Public school in Battersea, London",
+  "missing": false
+ },
+ "Harris Academy Battersea": {
+  "lat": null,
+  "lon": null,
+  "image": "Harris_Academy_Battersea.jpg",
+  "desc": "Academy in Battersea, London, England",
+  "missing": false
+ },
+ "King's Road": {
+  "lat": 51.48737,
+  "lon": -0.168874,
+  "image": "Kings_Road_SW3.jpg",
+  "desc": "Street in Chelsea and Fulham, London",
+  "missing": false
+ },
+ "Lots Road Power Station": {
+  "lat": 51.47785,
+  "lon": -0.18127,
+  "image": "Lots.road.power.station.london.arp.jpg",
+  "desc": "Disused power station in Chelsea, London",
+  "missing": false
+ },
+ "Queenstown Road railway station": {
+  "lat": 51.4748,
+  "lon": -0.147,
+  "image": "Queenstown_Road_railway_station_MMB_12_450557.jpg",
+  "desc": "National Rail station in London, England",
+  "missing": false
+ },
+ "Southside Wandsworth": {
+  "lat": 51.45472222,
+  "lon": -0.19361111,
+  "image": "Southside_Wandsworth_interior_view_of_Central_Mall.JPG",
+  "desc": "Shopping centre in London, England",
+  "missing": false
+ },
+ "Stamford Bridge (stadium)": {
+  "lat": 51.48166667,
+  "lon": -0.19111111,
+  "image": "London_Stamford_Bridge.jpg",
+  "desc": "Association football stadium in Fulham, London, England",
+  "missing": false
+ },
+ "Thomas's London Day Schools": {
+  "lat": null,
+  "lon": null,
+  "image": null,
+  "desc": "Group of private preparatory schools in London",
+  "missing": false
+ },
+ "Clapham Picturehouse": {
+  "lat": null,
+  "lon": null,
+  "image": null,
+  "desc": null,
+  "missing": true
+ },
+ "Wandsworth Riverside Quarter Pier": {
+  "lat": null,
+  "lon": null,
+  "image": null,
+  "desc": null,
+  "missing": true
+ },
+ "Battersea Dogs & Cats Home": {
+  "lat": 51.4785,
+  "lon": -0.1448,
+  "image": null,
+  "desc": "Animal rescue centre in London, England",
+  "missing": false
+ }
+}

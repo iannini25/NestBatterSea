@@ -1,0 +1,25 @@
+# working folder (14 GB of renders and masters): only the scripts are versioned
+_work/*
+!_work/*.py
+!_work/*.mjs
+!_work/*.sh
+!_work/package.json
+!_work/flight/
+_work/flight/*
+!_work/flight/*.py
+!_work/inside3/
+_work/inside3/*
+!_work/inside3/*.py
+!_work/ai/
+_work/ai/*
+!_work/ai/*.py
+!_work/ai/*.mjs
+!_work/mapdata/
+!_work/sitebuild/
+!_work/plan3d/
+_work/plan3d/backup-before-doors/
+**/node_modules/
+**/__pycache__/
+*.mkv
+*.log
+.env*

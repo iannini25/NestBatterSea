@@ -1,0 +1,37 @@
+
+== desktop: first load 329 KB in 15 requests {"Document":"18 KB","Image":"175 KB","Stylesheet":"39 KB","Script":"66 KB","Font":"32 KB"}
+   after scrolling the whole page: 638 KB in 17 requests
+    17.7 KB  Document   
+   126.3 KB  Image      assets/facade/master-1600.webp
+     1.0 KB  Stylesheet https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap
+    38.2 KB  Stylesheet css/app.css?v=13
+     9.0 KB  Script     js/data.js?v=13
+     4.2 KB  Script     js/notch.js?v=13
+    53.0 KB  Script     js/app.js?v=13
+     6.5 KB  Image      assets/brand/logo-light.png
+     8.1 KB  Font       https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLGT9Z1xlFQ.woff2
+     7.9 KB  Font       https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLEj6Z1xlFQ.woff2
+     7.8 KB  Font       https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLDz8Z1xlFQ.woff2
+     7.8 KB  Font       https://fonts.gstatic.com/s/poppins/v24/pxiEyp8kv8JHgFVrJJfecg.woff2
+    19.8 KB  Image      assets/site/crown.webp
+    12.7 KB  Image      assets/site/terrace.webp
+     9.5 KB  Image      assets/site/thumb-loft4.webp
+
+== phone: first load 580 KB in 16 requests {"Document":"18 KB","Image":"426 KB","Stylesheet":"39 KB","Script":"66 KB","Font":"31 KB"}
+   after scrolling the whole page: 888 KB in 18 requests
+    17.7 KB  Document   
+   261.5 KB  Image      assets/facade/master-2560.webp
+     0.7 KB  Stylesheet https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap
+    38.2 KB  Stylesheet css/app.css?v=13
+     9.0 KB  Script     js/data.js?v=13
+     4.2 KB  Script     js/notch.js?v=13
+    53.0 KB  Script     js/app.js?v=13
+     6.5 KB  Image      assets/brand/logo-light.png
+     7.6 KB  Font       https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLGT9Z1xlFd2JQEk.woff2
+     7.8 KB  Font       https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLEj6Z1xlFd2JQEk.woff2
+     7.7 KB  Font       https://fonts.gstatic.com/s/poppins/v24/pxiEyp8kv8JHgFVrJJfecnFHGPc.woff2
+     7.7 KB  Font       https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLDz8Z1xlFd2JQEk.woff2
+    19.8 KB  Image      assets/site/crown.webp
+    12.7 KB  Image      assets/site/terrace.webp
+   116.4 KB  Image      assets/site/aerial-1160.webp
+     9.5 KB  Image      assets/site/thumb-loft4.webp

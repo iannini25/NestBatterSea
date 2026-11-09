@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>plan3d qa</title>
+<style>
+html,body{margin:0;height:100%;background:#15171c;font-family:Poppins,system-ui,sans-serif}
+#v{position:fixed;inset:0}
+.p3-labels{position:absolute;inset:0;pointer-events:none}
+.p3-hot{display:none}
+</style>
+<script type="importmap">{"imports":{"three":"/_work/tools/npm3/node_modules/three/build/three.module.js","three/addons/":"/_work/tools/npm3/node_modules/three/examples/jsm/"}}</script>
+</head><body><div id="v"></div>
+<script type="module">
+// QA page: the dollhouse from src/ plus THREE, for the render checks in render.mjs
+import * as THREE from 'three';
+import { createViewer, APARTMENTS } from './backup-before-doors/src/viewer.js';
+const q = new URLSearchParams(location.search);
+window.THREE = THREE;
+window.APARTMENTS = APARTMENTS;
+window.viewer = createViewer(document.getElementById('v'), { apt: q.get('apt') || 'loft4', capture: true, quality: q.get('q') || 'high' });
+window.ready = true;
+</script></body></html>

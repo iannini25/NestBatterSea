@@ -1,0 +1,38 @@
+// load a preview page, exercise the viewer like the site does and screenshot it
+import puppeteer from 'puppeteer-core';
+const [, , url, out] = process.argv;
+const browser = await puppeteer.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: 'new', args: ['--ignore-gpu-blocklist', '--enable-gpu', '--use-angle=d3d11', '--no-sandbox'] });
+const page = await browser.newPage();
+await page.setViewport({ width: 1600, height: 900 });
+const logs = [];
+page.on('console', (m) => { if (['error', 'warning'].includes(m.type())) logs.push(m.type() + ': ' + m.text()); });
+page.on('pageerror', (e) => logs.push('pageerror: ' + e.message));
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+await page.goto(url, { waitUntil: 'networkidle0' });
+await sleep(1500);
+await page.screenshot({ path: out + '/pv-l4-lower.png' });
+await page.evaluate(() => document.querySelectorAll('#levels button')[1].click());
+await sleep(1800);
+await page.screenshot({ path: out + '/pv-l4-upper.png' });
+await page.evaluate(() => document.querySelectorAll('#levels button')[0].click());
+await sleep(1800);
+await page.screenshot({ path: out + '/pv-l4-lower-again.png' });
+// drag to orbit like a visitor
+await page.mouse.move(700, 450); await page.mouse.down(); await page.mouse.move(900, 420, { steps: 12 }); await page.mouse.up();
+await sleep(1500);
+await page.screenshot({ path: out + '/pv-l4-orbit.png' });
+await page.evaluate(() => document.querySelector('#rooms li button').click());
+await sleep(2600);
+await page.screenshot({ path: out + '/pv-l4-room.png' });
+await page.evaluate(() => document.querySelector('#photo .back').click());
+await sleep(1500);
+await page.evaluate(() => document.querySelectorAll('#home button')[1].click());
+await sleep(2000);
+await page.screenshot({ path: out + '/pv-b3.png' });
+await page.mouse.move(700, 450); await page.mouse.down(); await page.mouse.move(520, 470, { steps: 12 }); await page.mouse.up();
+await sleep(1500);
+await page.screenshot({ path: out + '/pv-b3-orbit.png' });
+const info = await page.evaluate(() => ({ levels: window.viewer.levels, level: window.viewer.level, hot: document.querySelectorAll('.p3-hot').length, rooms: [...document.querySelectorAll('#rooms li')].map((l) => l.textContent.trim()) }));
+console.log(JSON.stringify(info));
+console.log(logs.filter((l) => !/404/.test(l)).join('\n') || 'no console errors');
+await browser.close();

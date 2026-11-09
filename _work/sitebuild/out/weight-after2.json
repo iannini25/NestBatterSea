@@ -1,0 +1,96 @@
+{
+  "desktop": {
+    "first": {
+      "total": 604017,
+      "n": 21,
+      "by": {
+        "Document": 87546,
+        "Image": 249892,
+        "Stylesheet": 89499,
+        "Script": 144725,
+        "Font": 32355
+      }
+    },
+    "after": {
+      "total": 2929260,
+      "n": 52,
+      "by": {
+        "Document": 87546,
+        "Image": 2262127,
+        "Stylesheet": 97670,
+        "Script": 336815,
+        "Font": 32355,
+        "Fetch": 112747
+      }
+    },
+    "list": [
+      "    85.5 KB  Document   ",
+      "   126.3 KB  Image      assets/facade/master-1600.webp",
+      "     1.0 KB  Stylesheet https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap",
+      "    69.6 KB  Stylesheet css/app.css?v=24",
+      "    16.8 KB  Stylesheet css/talk.css?v=24",
+      "     9.0 KB  Script     js/data.js?v=24",
+      "     4.2 KB  Script     js/notch.js?v=24",
+      "    65.7 KB  Script     js/app.js?v=24",
+      "    11.8 KB  Script     js/motion.js?v=24",
+      "     9.2 KB  Script     js/talk.js?v=24",
+      "     6.5 KB  Image      assets/brand/logo-light.png",
+      "     8.3 KB  Font       https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLEj6Z1xlFQ.woff2",
+      "     7.7 KB  Font       https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLGT9Z1xlFQ.woff2",
+      "     7.8 KB  Font       https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLDz8Z1xlFQ.woff2",
+      "     7.8 KB  Font       https://fonts.gstatic.com/s/poppins/v24/pxiEyp8kv8JHgFVrJJfecg.woff2",
+      "    58.8 KB  Image      assets/site/vision/tower-680.avif",
+      "    23.2 KB  Image      assets/site/crown.avif",
+      "    16.2 KB  Image      assets/site/terrace.avif",
+      "    13.0 KB  Image      assets/site/thumb-loft4.webp",
+      "    25.6 KB  Script     https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js",
+      "    15.8 KB  Script     https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"
+    ]
+  },
+  "phone": {
+    "first": {
+      "total": 701306,
+      "n": 19,
+      "by": {
+        "Document": 87546,
+        "Image": 348006,
+        "Stylesheet": 89158,
+        "Script": 145012,
+        "Font": 31584
+      }
+    },
+    "after": {
+      "total": 2524012,
+      "n": 46,
+      "by": {
+        "Document": 87546,
+        "Image": 1857818,
+        "Stylesheet": 97329,
+        "Script": 337071,
+        "Font": 31584,
+        "Fetch": 112664
+      }
+    },
+    "list": [
+      "    85.5 KB  Document   ",
+      "   261.5 KB  Image      assets/facade/master-2560.webp",
+      "     0.7 KB  Stylesheet https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap",
+      "    69.6 KB  Stylesheet css/app.css?v=24",
+      "    16.8 KB  Stylesheet css/talk.css?v=24",
+      "     9.0 KB  Script     js/data.js?v=24",
+      "     4.2 KB  Script     js/notch.js?v=24",
+      "    65.7 KB  Script     js/app.js?v=24",
+      "    11.8 KB  Script     js/motion.js?v=24",
+      "     9.2 KB  Script     js/talk.js?v=24",
+      "     6.5 KB  Image      assets/brand/logo-light.png",
+      "     7.8 KB  Font       https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLEj6Z1xlFd2JQEk.woff2",
+      "     7.6 KB  Font       https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLGT9Z1xlFd2JQEk.woff2",
+      "     7.7 KB  Font       https://fonts.gstatic.com/s/poppins/v24/pxiEyp8kv8JHgFVrJJfecnFHGPc.woff2",
+      "     7.7 KB  Font       https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLDz8Z1xlFd2JQEk.woff2",
+      "    58.8 KB  Image      assets/site/vision/tower-680.avif",
+      "    13.0 KB  Image      assets/site/thumb-loft4.webp",
+      "    25.5 KB  Script     https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js",
+      "    16.2 KB  Script     https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"
+    ]
+  }
+}
