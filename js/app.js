@@ -706,13 +706,14 @@ function shotShow(i, instant, rest) {
   // the first view of the tour is where the walk in hands over: it starts exactly at rest
   // so does the view a flight into a room lands on: it fades in on the frame the camera reaches
   const fresh = (shots.mode === 'tour' && i === 0 && !shots.seen) || shots.arrive;
+  const arriving = shots.arrive;
   shots.arrive = false;
   shots.seen = true;
   // views that change on their own are not read out; the ones the visitor asks for are
   el.cap.setAttribute('aria-live', tour.auto ? 'off' : 'polite');
   figs.forEach((f, ix) => {
     const on = ix === i;
-    f.style.transition = instant || reduced ? 'none' : `opacity ${XFADE}s ${SOFT}`;
+    f.style.transition = instant || reduced ? 'none' : `opacity ${arriving ? ARRIVE : XFADE}s ${SOFT}`;
     f.style.opacity = on ? 1 : 0;
     f.setAttribute('aria-hidden', String(!on));             // only the photograph on screen is announced
     if (on) tourMotion(f.querySelector('img'), ix, fresh, rest);
@@ -725,7 +726,7 @@ function shotShow(i, instant, rest) {
    seconds, then the next one fades in on its own. The zoom is the clock: the ring
    reads it, pausing it pauses both, and its end turns the page. */
 const DWELL = 6, XFADE = .8;                               // seconds on a view, crossfade to the next
-const SOFT = 'cubic-bezier(.45,0,.55,1)', DIVE = 2.1;      // crossfade curve, seconds of a flight into a room
+const SOFT = 'cubic-bezier(.45,0,.55,1)', DIVE = 2.1, ARRIVE = .7;   // crossfade curve, seconds of a flight into a room and of the 3D becoming its photograph
 const tour = { anim: null, hold: new Set(), paused: false, auto: false, raf: 0, n: -1 };
 const tourOn = () => (state === 'inside' || state === 'room') && !reduced;
 function tourMotion(img, ix, fresh, rest) {
@@ -1017,12 +1018,12 @@ async function openRoom(x) {
     shotShow(i);
   };
   if (viewer && viewer.mode === '3d' && !reduced) {
-    // one move: the photograph starts fading in while the camera slows, and is whole as it arrives
-    const at = 1 - (XFADE + .05) / DIVE;
-    try { pendingDive = viewer.v.dive(list[i].id, DIVE * 1000, t => { if (decoded && t >= at) reveal(); }); await pendingDive; } catch (e) {}
+    // the camera arrives first: the 3D becomes the photograph only once it is practically at rest
+    try { pendingDive = viewer.v.dive(list[i].id, DIVE * 1000, t => { if (decoded && t >= .97) reveal(); }); await pendingDive; } catch (e) {}
   }
   await ready;
   reveal();
+  if (viewer && viewer.mode === '3d') await wait(ARRIVE * 1000);   // nothing on the photograph moves during the dissolve
   setBusy(false);
   setState('room');
 }
@@ -1039,10 +1040,16 @@ async function backToPlan() {
   const three = viewer && viewer.mode === '3d';
   if (three) { try { await pendingDive; } catch (e) {} }
   if (three && !reduced) {
-    // the photograph settles on the room's own framing and dissolves as the camera starts to lift
+    // the photograph eases back to the room's own framing, becomes the 3D, and only then the camera leaves
     const f = $$('.shot', el.photos)[shots.i], img = f && f.querySelector('img');
-    if (img) img.animate([{ transform: getComputedStyle(img).transform }, { transform: 'translateX(0px) scale(1)' }], { duration: XFADE * 1000, easing: SOFT, fill: 'forwards' });
-    await Promise.all([viewer.v.frame(true).catch(() => {}), fade(el.photos, 0, XFADE, smooth)]);
+    if (img) {
+      const from = getComputedStyle(img).transform;
+      const m = from.startsWith('matrix(') ? from.slice(7, -1).split(',').map(Number) : [1, 0, 0, 1, 0, 0];
+      const off = Math.max(Math.abs(m[0] - 1) * 900, Math.abs(m[4]));   // how far from rest, in pixels
+      if (off > 1) await img.animate([{ transform: from }, { transform: 'translateX(0px) scale(1)' }], { duration: Math.min(700, 250 + off * 6), easing: SOFT, fill: 'forwards' }).finished.catch(() => {});
+    }
+    await fade(el.photos, 0, ARRIVE, smooth);
+    await viewer.v.frame(true).catch(() => {});
   } else {
     await fade(el.photos, 0, .6);
     if (three) { try { await viewer.v.frame(false); } catch (e) {} }

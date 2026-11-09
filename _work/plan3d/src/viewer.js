@@ -102,7 +102,7 @@ export function createViewer(container, opts = {}) {
   }
 
   // model
-  let model = null, apt = null, level = 0, overlays = [], labels = [], hovered = null;
+  let model = null, apt = null, level = 0, overlays = [], labels = [], hovered = null, ceilings = [];
   const labelLayer = document.createElement('div');
   labelLayer.className = 'p3-labels';
   container.appendChild(labelLayer);
@@ -131,6 +131,21 @@ export function createViewer(container, opts = {}) {
         lv.group.add(m);
         overlays.push(m);
         r.overlay = m;
+      }
+    }
+    // ceilings face down only: from above they do not exist, from inside a room they close it.
+    // The camera crosses their plane edge on, so nothing ever appears in the picture.
+    ceilings = [];
+    const ceilMat = new THREE.MeshStandardMaterial({ color: 0xe9e4da, roughness: 0.95 });
+    for (const lv of model.levels) {
+      for (const r of lv.rooms) {
+        if (!r.mesh || r.exterior || r.double) continue;
+        const m = new THREE.Mesh(new THREE.ShapeGeometry(new THREE.Shape(r.polyM.map(([x, z]) => new THREE.Vector2(x, z)))), ceilMat);
+        m.rotation.x = Math.PI / 2;
+        m.position.y = apt.wallH;
+        m.visible = !interiorMode;
+        lv.group.add(m);
+        ceilings.push(m);
       }
     }
     // labels for rooms that have a photograph
@@ -177,14 +192,7 @@ export function createViewer(container, opts = {}) {
       fit.center.y + dist * Math.cos(polar),
       fit.center.z + dist * Math.sin(polar) * Math.cos(azimuth),
     );
-    if (animate) {
-      // the walls take their overview state now, while the photograph still covers the model
-      const p = camera.position.clone(), l = controls.target.clone();
-      camera.position.copy(pos); controls.target.copy(fit.center);
-      updateCuts(true);
-      camera.position.copy(p); controls.target.copy(l);
-      return flyTo(pos, fit.center.clone(), 30, FLY);
-    }
+    if (animate) return flyTo(pos, fit.center.clone(), 30, FLY);
     camera.position.copy(pos);
     controls.target.copy(fit.center);
     camera.fov = 30;
@@ -263,13 +271,17 @@ export function createViewer(container, opts = {}) {
 
   // camera flights (dive into a room, back to the overview)
   // mode: 'orbit' lets OrbitControls run, 'fly' during a tween, 'pose' at an eye level viewpoint
-  let flight = 0;
+  let flight = 0, flightStats = null;
   let mode = 'orbit';
   function flyTo(pos, look, fov, dur = FLY, end = 'orbit', onStep) {
     const my = ++flight;
     const p0 = camera.position.clone(), t0v = controls.target.clone(), f0 = camera.fov;
+    // into or out of a room the path arcs over the walls and drops through the open top of the room
+    const room = end === 'pose' ? pos : mode === 'pose' ? p0 : null;
+    const via = room && dur > 0 ? new THREE.Vector3(room.x, model.levels[level].base + apt.wallH + 2.6, room.z) : null;
     controls.enabled = false;
     mode = 'fly';
+    const pending = planCuts(pos, look);
     return new Promise((res) => {
       // the clock starts on the first frame and the first frames cannot jump ahead,
       // so setting the move up never shows as a burst of speed at the start
@@ -280,18 +292,22 @@ export function createViewer(container, opts = {}) {
         last = now;
         const t = dur > 0 ? Math.min(1, clock / dur) : 1;
         const k = smoother(t);
-        camera.position.lerpVectors(p0, pos, k);
+        if (via) camera.position.copy(p0).multiplyScalar((1 - k) * (1 - k)).addScaledVector(via, 2 * k * (1 - k)).addScaledVector(pos, k * k);
+        else camera.position.lerpVectors(p0, pos, k);
         controls.target.lerpVectors(t0v, look, k);
         camera.fov = f0 + (fov - f0) * k;
         camera.updateProjectionMatrix();
         camera.lookAt(controls.target);
+        camera.updateMatrixWorld();
+        flipUnseen(pending, k);
         renderNow();
         if (onStep) onStep(t);
         if (t < 1) requestAnimationFrame(step);
         else {
           mode = end;
           if (end === 'orbit') { controls.enabled = true; controls.update(); }
-          updateCuts(true);
+          flightStats = { walls: pending.length, atEnd: pending.filter((p) => !p.done).map((p) => p.c.name || [+p.c.cx.toFixed(1), +p.c.cz.toFixed(1)]) };
+          if (end !== 'orbit') pending.forEach((p) => { if (!p.done) setCut(p.c, p.goal); });
           renderNow();
           res();
         }
@@ -324,6 +340,7 @@ export function createViewer(container, opts = {}) {
     tintBase();
     clip.constant = on ? 100 : model.levels[level].base + apt.wallH + 0.01;
     overlays.forEach((o) => (o.visible = !on));
+    ceilings.forEach((o) => (o.visible = !on));
     labelLayer.style.display = on ? 'none' : '';
     pointLights.forEach((l) => scene.remove(l));
     pointLights = [];
@@ -427,14 +444,83 @@ export function createViewer(container, opts = {}) {
   // header over a door disappears as soon as the wall drops below it.
   const camDir = new THREE.Vector3();
   const CUT = 0.95;
+  function setCut(c, top) {
+    if (top === c.top) return;
+    c.top = top;
+    for (const p of c.parts) {
+      const s = (top - p.a) / (p.b - p.a);
+      p.o.visible = s > 0.002;
+      p.o.scale.y = Math.min(1, Math.max(0.002, s));
+    }
+  }
+  // inside a room (dive) or in interior mode every wall stands full height
+  const isInside = (eyeY, high) => interiorMode || eyeY - model.levels[level].base < 3.4 || high < 2.5;
+
+  // the walls a flight has to change, with what is needed to see when they are out of sight
+  const box = new THREE.Box3();
+  function planCuts(pos, look) {
+    if (!model) return [];
+    camDir.subVectors(pos, look);
+    const high = camDir.y;
+    camDir.y = 0;
+    camDir.normalize();
+    const inside = isInside(pos.y, high), out = [];
+    model.levels.forEach((lv, k) => {
+      for (const u of lv.cuts) {
+        const c = u.userData.cut;
+        const goal = !inside && k === level && c.cx * camDir.x + c.cz * camDir.z > 0.55 ? CUT : c.full;
+        if ((c.top ?? c.full) === goal) continue;
+        box.setFromObject(u);
+        const alongX = box.max.x - box.min.x >= box.max.z - box.min.z;
+        const line = alongX ? (box.min.z + box.max.z) / 2 : (box.min.x + box.max.x) / 2;
+        const end = alongX ? [[box.min.x, line], [box.max.x, line]] : [[line, box.min.z], [line, box.max.z]];
+        const y0 = lv.base + CUT, y1 = lv.base + c.full;
+        const side = (p) => Math.sign((alongX ? p.z : p.x) - line);
+        out.push({ c, goal, done: false, sign: 0, side, target: side(pos), start: c.top ?? c.full, glide: side(camera.position) === side(pos), pts: [[end[0][0], y0, end[0][1]], [end[1][0], y0, end[1][1]], [end[1][0], y1, end[1][1]], [end[0][0], y1, end[0][1]]] });
+      }
+    });
+    return out;
+  }
+  // a wall may change on the frames it is seen exactly edge on, or wholly out of the picture
+  // (and then only once the camera is on the side it ends on, so it can never block the way)
+  const q = new THREE.Vector3();
+  function flipUnseen(pending, k) {
+    for (const p of pending) {
+      if (p.done) continue;
+      let behind = 0, l = 0, r = 0, b = 0, t = 0, area = 0, px = 0, py = 0, fx = 0, fy = 0;
+      p.pts.forEach(([x, y, z], i) => {
+        q.set(x, y, z).applyMatrix4(camera.matrixWorldInverse);
+        if (q.z > -camera.near) behind++;
+        q.applyMatrix4(camera.projectionMatrix);
+        if (q.x < -1) l++; if (q.x > 1) r++; if (q.y < -1) b++; if (q.y > 1) t++;
+        if (i) area += px * q.y - q.x * py; else { fx = q.x; fy = q.y; }
+        px = q.x; py = q.y;
+      });
+      area += px * fy - fx * py;
+      const sameSide = p.side(camera.position) === p.target || p.target === 0;
+      const off = behind === 4 || l === 4 || r === 4 || b === 4 || t === 4;
+      // crossing the wall's plane is the moment it is seen exactly edge on, wherever the camera is
+      const now = p.side(camera.position);
+      const crossed = now && p.sign && now !== p.sign;
+      const edgeOn = !behind && Math.abs(area) < 0.0008;
+      if ((off && (sameSide || p.goal === CUT)) || crossed || edgeOn) { setCut(p.c, p.goal); p.done = true; }
+      if (now) p.sign = now;
+      // the few walls the camera never passes and never loses sight of follow the descent itself
+      if (!p.done && p.glide) {
+        const [a, b] = p.goal === CUT ? [0.05, 0.5] : [0.5, 0.95];
+        const u = Math.min(1, Math.max(0, (k - a) / (b - a)));
+        setCut(p.c, p.start + (p.goal - p.start) * smoother(u));
+        if (u === 1) p.done = true;
+      }
+    }
+  }
   function updateCuts(snap = false) {
     if (!model || (mode === 'fly' && !snap)) return false;  // in flight only the camera moves
     camDir.subVectors(camera.position, controls.target);
     const high = camDir.y;
     camDir.y = 0;
     camDir.normalize();
-    // inside a room (dive) or in interior mode every wall stands full height
-    const inside = interiorMode || camera.position.y - model.levels[level].base < 3.4 || high < 2.5;
+    const inside = isInside(camera.position.y, high);
     let moving = false;
     model.levels.forEach((lv, k) => {
       for (const u of lv.cuts) {
@@ -445,14 +531,7 @@ export function createViewer(container, opts = {}) {
         const cur = c.top ?? c.full;
         const nxt = snap ? tgt : cur + (tgt - cur) * 0.22;
         if (Math.abs(nxt - tgt) > 0.002) moving = true;
-        const top = Math.abs(nxt - tgt) <= 0.002 ? tgt : nxt;
-        if (top === c.top) continue;
-        c.top = top;
-        for (const p of c.parts) {
-          const s = (top - p.a) / (p.b - p.a);
-          p.o.visible = s > 0.002;
-          p.o.scale.y = Math.min(1, Math.max(0.002, s));
-        }
+        setCut(c, Math.abs(nxt - tgt) <= 0.002 ? tgt : nxt);
       }
     });
     return moving;
@@ -495,6 +574,7 @@ export function createViewer(container, opts = {}) {
     load: (id) => { load(id); resize(); frame(false); },
     setLevel, frame, dive, flyTo, setInterior,
     get level() { return level; },
+    get flightStats() { return flightStats; },
     get levels() { return model.levels.map((l) => ({ id: l.id, label: l.label })); },
     get model() { return model; },
     renderer, scene, camera, controls,

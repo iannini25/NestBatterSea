@@ -235,7 +235,7 @@ const LOFT4 = {
   // camera poses for the room photographs and for the dive into a room
   // (eye height in metres above that floor, target point in plan px with its height)
   poses: {
-    'loft4-living': { level: 'lower', eye: [1368, 418, 1.5], look: [1120, 430, 2.05], fov: 66 },
+    'loft4-living': { level: 'lower', eye: [1372, 412, 1.4], look: [1100, 412, 1.4], fov: 56 },
     'loft4-arrive': { level: 'lower', eye: [1880, 404, 3.0], look: [1380, 404, 3.0], fov: 56 },
     'loft4-kitchen': { level: 'lower', eye: [1040, 478, 1.55], look: [1330, 360, 1.7], fov: 62 },
     'loft4-bed1': { level: 'lower', eye: [1314, 655, 1.6], look: [1447, 560, 0.85], fov: 74 },
@@ -374,7 +374,7 @@ const BUNG3 = {
     trees: [{ at: [428, 392], h: 2.4 }, { at: [455, 486], h: 1.3, shrub: true }, { at: [560, 293], h: 1.2, shrub: true }],
   },
   poses: {
-    'bung3-living': { level: 'main', eye: [566, 340, 1.5], look: [500, 600, 1.0], fov: 70 },
+    'bung3-living': { level: 'main', eye: [556, 375, 1.3], look: [556, 600, 1.3], fov: 62 },
     'bung3-arrive': { level: 'main', eye: [562, 40, 1.6], look: [562, 327, 1.6], fov: 56 },
     'bung3-kitchen': { level: 'main', eye: [560, 520, 1.55], look: [705, 360, 1.25], fov: 62 },
     'bung3-bed2': { level: 'main', eye: [800, 458, 1.6], look: [735, 330, 0.85], fov: 74 },
