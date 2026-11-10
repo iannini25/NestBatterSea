@@ -184,6 +184,29 @@ body[data-state="inside"] .tourt,body[data-state="room"] .tourt{display:block}
 @media (prefers-reduced-motion:reduce){body[data-state="inside"] .tourt,body[data-state="room"] .tourt{display:none}}
 body[data-state="flight"] .band,body[data-state="moving"] .band{opacity:.0}
 .band{transition:opacity var(--t3) var(--ease)}
+/* the tour: the photograph opens the 3D plan from the same viewpoint (a small button in the band,
+   and on pointer devices a glass label that follows the pointer over the photograph) */
+.see3d{display:none;flex:none;align-items:center;gap:9px;height:34px;padding:0 15px 0 4px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--line2);color:var(--paper);font-size:12.5px;font-weight:500;letter-spacing:.01em;white-space:nowrap;cursor:pointer;transition:background var(--t1) var(--ease),border-color var(--t1) var(--ease),transform var(--t2) var(--spring)}
+.see3d i{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--blue);color:var(--ink);transition:transform .45s var(--spring)}
+.see3d svg{width:15px;height:15px}
+.see3d:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.26)}
+.see3d:hover i{transform:rotate(-12deg)}
+.see3d:active{transform:scale(.96)}
+body[data-state="inside"] .see3d{display:inline-flex}
+body[data-state="inside"] #photos{cursor:pointer}
+@media (hover:none){body[data-state="inside"] #photos{cursor:auto}}
+.lens{position:absolute;z-index:4;left:0;top:0;pointer-events:none;will-change:transform}
+.lens.glide{transition:transform .22s cubic-bezier(.22,.61,.24,1)}
+.lens-in{display:flex;align-items:center;gap:10px;height:42px;padding:0 18px 0 5px;border-radius:999px;color:var(--paper);font-size:13px;font-weight:500;letter-spacing:.005em;white-space:nowrap;
+  background:linear-gradient(158deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,.04) 40%,rgba(255,255,255,0) 70%),rgba(11,15,25,.46);
+  -webkit-backdrop-filter:blur(20px) saturate(1.5);backdrop-filter:blur(20px) saturate(1.5);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.24),inset 0 0 0 1px rgba(255,255,255,.1),0 18px 40px -16px rgba(0,0,0,.6);
+  opacity:0;transform:scale(.9);transform-origin:0 0;transition:opacity .35s var(--ease),transform .45s var(--ease)}
+.lens-in i{width:32px;height:32px;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--blue);color:var(--ink)}
+.lens-in svg{width:17px;height:17px}
+.lens.on .lens-in{opacity:1;transform:none}
+.lens.flip .lens-in{transform-origin:100% 100%}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.lens-in{background:rgba(16,20,31,.9)}}
 
 /* ---------------- bottom right notch: the mini card ---------------- */
 .mini{position:absolute;z-index:20;right:var(--m);bottom:var(--m);display:flex;flex-direction:column;align-items:flex-end;gap:var(--g);translate:0 var(--lag,0px);transition:opacity .7s var(--ease) .35s,transform .8s var(--ease) .35s}
@@ -240,8 +263,12 @@ body[data-state="home"] .panel{opacity:1;visibility:visible;pointer-events:auto;
 
 /* ---------------- floor plan ---------------- */
 #plan{background:radial-gradient(110% 90% at 38% 45%,#1d2435 0%,#0f131e 55%,#090b11 100%)}
-#plan3d{position:absolute;top:0;bottom:0;left:calc((var(--pp-w) + 24px) / -2);right:calc((var(--pp-w) + 24px) / 2);opacity:0;transition:opacity .8s var(--ease)}
+@property --fe{syntax:'<length>';inherits:false;initial-value:0px}
+#plan3d{position:absolute;top:0;bottom:0;left:calc((var(--pp-w) + 24px) / -2);right:calc((var(--pp-w) + 24px) / 2);opacity:0;--fe:160px;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - var(--fe)),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - var(--fe)),transparent);transition:opacity .8s var(--ease),transform 2.1s cubic-bezier(.45,0,.55,1),--fe 2.1s cubic-bezier(.45,0,.55,1)}
 #plan3d.ready{opacity:1}
+/* at a photograph's viewpoint the model fills the card exactly as the photograph does; the shift
+   that centres the overview beside the panel (and the soft right edge it needs) eases in and out with the camera */
+#plan.pose #plan3d{transform:translateX(calc((var(--pp-w) + 24px) / 2));--fe:0px}
 #plan3d canvas{display:block;outline:none}
 #plan2d{position:absolute;top:0;bottom:0;left:0;right:calc(var(--pp-w) + 24px);display:none;place-items:center;padding:calc(var(--hb) + var(--g) + 24px) 40px calc(var(--band) + 24px)}
 #plan2d.on{display:grid}
@@ -759,6 +786,8 @@ html.gsap-pin .view.wide .view-media .ncard{height:calc(clamp(360px,36vw,640px) 
   .p-note{font-size:11px}
   .panel .fine{display:none}
   #plan3d{left:0;right:0;top:calc(var(--hb) + var(--g));bottom:var(--pph,46%)}
+  #plan3d,#plan.pose #plan3d{transform:none;-webkit-mask-image:none;mask-image:none}
+  .see3d{height:32px;padding:0 12px 0 3px;font-size:12px;gap:7px}
   #plan2d{right:0;bottom:var(--pph,46%);padding:calc(var(--hb) + var(--g) + 12px) 16px 12px}
   .ploading{left:50%;top:calc((100% - var(--pph,46%)) / 2)}
   .ppanel{left:var(--g);right:var(--g);top:auto;bottom:var(--g);width:auto;max-height:52%;padding:16px 16px 14px;gap:10px;border-radius:20px;transform:translateY(24px)}
@@ -883,6 +912,9 @@ html.gsap-pin .view.wide .view-media .ncard{height:calc(clamp(360px,36vw,640px) 
 @media (max-width:600px){
   body[data-state="inside"] .note,body[data-state="room"] .note{display:none}
   body[data-state="inside"] .cap-i::after,body[data-state="room"] .cap-i::after{content:' \00B7  Illustrative';letter-spacing:.14em;color:var(--p3)}
+  /* the caption keeps its room: the 3D plan button floats in glass just above the band, over the arrows */
+  .see3d{position:absolute;right:var(--pad);bottom:calc(100% + 12px);height:36px;padding:0 14px 0 4px;border-color:rgba(255,255,255,.18);background:linear-gradient(158deg,rgba(255,255,255,.16),rgba(255,255,255,.03) 50%),rgba(11,15,25,.5);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 12px 30px -12px rgba(0,0,0,.55)}
+  .see3d i{width:28px;height:28px}
 }
 @media (max-width:860px) and (max-height:640px){
   #hero-title{font-size:26px}

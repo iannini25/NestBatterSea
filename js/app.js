@@ -53,7 +53,8 @@ const el = {
   minibar: $('#minibar'), mprev: $('#mprev'), mnext: $('#mnext'), picker: $('#picker'), panel: $('#panel'),
   ppanel: $('#ppanel'), toggle: $('#pp-toggle'), rooms: $('#pp-rooms'), hinttxt: $('#hinttxt'), note: $('#note'),
   capI: $('#cap-i'), capT: $('#cap-t'), capS: $('#cap-s'), bprev: $('#bprev'), bnext: $('#bnext'), facade: $('#facade'),
-  ppkick: $('#pp-kick'), band: $('#band'), cap: $('#cap'), tourt: $('#tourt'), ttfg: $('#tt-fg'), ttn: $('#tt-n')
+  ppkick: $('#pp-kick'), band: $('#band'), cap: $('#cap'), tourt: $('#tourt'), ttfg: $('#tt-fg'), ttn: $('#tt-n'),
+  lens: $('#lens'), see3d: $('#see3d')
 };
 
 let state = 'boot', cur = null, busy = false, armed = null, sel = 0, hot = null, returning = false;
@@ -93,6 +94,7 @@ function setState(s) {
   const was = STAGED(state);
   state = s;
   el.body.dataset.state = s;
+  if (s !== 'inside') lens.hide();                          // the tour's label lives only in the tour
   if (s === 'tower') breathe.start();
   const now = STAGED(s);
   if (was !== now) {
@@ -766,6 +768,8 @@ function tourDraw() {
   const n = Math.max(1, Math.ceil(DWELL * (1 - t) - 1e-3));
   if (n !== tour.n) { tour.n = n; el.ttn.textContent = n; }
 }
+// the tour holds still while something asks for the visitor's attention (k names the reason)
+function tourHold(k, on) { if (on) tour.hold.add(k); else tour.hold.delete(k); tourSync(); }
 function tourNext() {
   if (!tourOn() || busy) return;
   tour.auto = true;
@@ -938,7 +942,8 @@ function setPlan2d(i) {
   }, reduced ? 0 : 180);
 }
 function planSheet() { el.card.style.setProperty('--pph', (el.ppanel.offsetHeight + 16) + 'px'); }
-async function ensureViewer(r) {
+// also: a state besides 'plan' the viewer may be built in (the tour builds it under its photograph)
+async function ensureViewer(r, also) {
   if (viewer && viewer.id === r.id) {
     if (viewer.mode === '3d') buildToggle(viewer.v.levels.map(l => l.label), viewer.v.level);
     else { buildToggle(r.plans.length > 1 ? r.plans.map(p => p.label) : [], viewer.level || 0); el.plan2d.classList.add('on'); }
@@ -946,7 +951,7 @@ async function ensureViewer(r) {
   }
   disposeViewer();
   const mod = await loadPlan3d();
-  if (state !== 'plan' || cur !== r) return;
+  if ((state !== 'plan' && state !== also) || cur !== r) return;
   if (mod && mod.createViewer) {
     try {
       const v = mod.createViewer(el.plan3d, {
@@ -971,6 +976,7 @@ function disposeViewer() {
   if (!viewer) return;
   if (viewer.v) { try { viewer.v.dispose(); } catch (e) {} }
   viewer = null; planHover = null; pendingDive = null;
+  posed(false, true);
   el.plan3d.classList.remove('ready');
   el.plan3d.innerHTML = '';
   el.plan2d.classList.remove('on');
@@ -1019,6 +1025,7 @@ async function openRoom(x) {
   };
   if (viewer && viewer.mode === '3d' && !reduced) {
     // the camera arrives first: the 3D becomes the photograph only once it is practically at rest
+    posed(true);
     try { pendingDive = viewer.v.dive(list[i].id, DIVE * 1000, t => { if (decoded && t >= .97) reveal(); }); await pendingDive; } catch (e) {}
   }
   await ready;
@@ -1041,17 +1048,13 @@ async function backToPlan() {
   if (three) { try { await pendingDive; } catch (e) {} }
   if (three && !reduced) {
     // the photograph eases back to the room's own framing, becomes the 3D, and only then the camera leaves
-    const f = $$('.shot', el.photos)[shots.i], img = f && f.querySelector('img');
-    if (img) {
-      const from = getComputedStyle(img).transform;
-      const m = from.startsWith('matrix(') ? from.slice(7, -1).split(',').map(Number) : [1, 0, 0, 1, 0, 0];
-      const off = Math.max(Math.abs(m[0] - 1) * 900, Math.abs(m[4]));   // how far from rest, in pixels
-      if (off > 1) await img.animate([{ transform: from }, { transform: 'translateX(0px) scale(1)' }], { duration: Math.min(700, 250 + off * 6), easing: SOFT, fill: 'forwards' }).finished.catch(() => {});
-    }
+    await photoRest();
     await fade(el.photos, 0, ARRIVE, smooth);
+    posed(false);
     await viewer.v.frame(true).catch(() => {});
   } else {
     await fade(el.photos, 0, .6);
+    posed(false, true);
     if (three) { try { await viewer.v.frame(false); } catch (e) {} }
   }
   el.photos.innerHTML = '';
@@ -1063,6 +1066,133 @@ async function backToPlan() {
   setBusy(false);
   setState('plan');
 }
+// at a viewpoint the model fills the card as the photograph does (see #plan.pose in the CSS);
+// the shift eases with the camera unless instant
+function posed(on, instant) {
+  if (el.plan.classList.contains('pose') === on) return;
+  if (!instant && !reduced) { el.plan.classList.toggle('pose', on); return; }
+  el.plan3d.style.transition = 'none';
+  el.plan.classList.toggle('pose', on);
+  void el.plan3d.offsetWidth;
+  el.plan3d.style.transition = '';
+}
+// the photograph on screen eases back to its own framing (where the 3D viewpoint matches it)
+async function photoRest() {
+  const f = $$('.shot', el.photos)[shots.i], img = f && f.querySelector('img');
+  if (!img || reduced) return;
+  const from = getComputedStyle(img).transform;
+  const m = from.startsWith('matrix(') ? from.slice(7, -1).split(',').map(Number) : [1, 0, 0, 1, 0, 0];
+  const off = Math.max(Math.abs(m[0] - 1) * 900, Math.abs(m[4]));   // how far from rest, in pixels
+  if (off > 1) await img.animate([{ transform: from }, { transform: 'translateX(0px) scale(1)' }], { duration: Math.min(700, 250 + off * 6), easing: SOFT, fill: 'forwards' }).finished.catch(() => {});
+}
+
+/* ---------- from the tour to the 3D plan ---------------------------------
+   The way back from a room, started in the tour: the 3D is built under the photograph at the
+   photograph's own viewpoint, the photograph dissolves into it with the camera still, then the
+   camera pulls out to the overview. Without a viewpoint for the view (or without the 3D) the
+   plan simply dissolves in. Back from there is the plan's own Back: to the residence. */
+async function insidePlan() {
+  if (busy || state !== 'inside' || !cur) return;
+  const r = cur, s = shots.list[shots.i];
+  lens.hide(true);
+  setBusy(true);
+  setState('moving');                                      // the tour stops where it is
+  fillPlanPanel(r);
+  if (mobile) planSheet();
+  planHover = null;
+  // underneath, the residence the plan's Back returns to
+  el.stillimg.style.transform = '';
+  await showStill(stillOf(r));
+  show(el.still);
+  el.plan.classList.add('loading');
+  show(el.plan);                                           // under the photographs, which stay opaque
+  await ensureViewer(r, 'moving');
+  el.plan.classList.remove('loading');
+  const three = !!viewer && viewer.mode === '3d';
+  const poses = three && viewer.v.model && viewer.v.model.poses;
+  const pose = !!(poses && s && poses[s.id]);
+  if (three) {                                             // no fade of its own: the photograph is the fade
+    el.plan3d.style.transition = 'none';
+    el.plan3d.classList.add('ready');
+    void el.plan3d.offsetWidth;
+    el.plan3d.style.transition = '';
+  }
+  if (pose && !reduced) {
+    posed(true, true);
+    try { await viewer.v.dive(s.id, 0); } catch (e) {}
+    await raf(); await raf();                              // the viewpoint is drawn before anything shows it
+    await photoRest();
+    await fade(el.photos, 0, ARRIVE, smooth);              // the photograph becomes the model, the camera still
+    posed(false);
+    await viewer.v.frame(true).catch(() => {});
+  } else {
+    await fade(el.photos, 0, reduced ? 0 : .6);
+  }
+  el.photos.innerHTML = '';
+  if (three) {
+    const lv = viewer.v.level || 0;
+    if (lv !== planLevel) { planLevel = lv; markToggle(); fillRooms(); }
+  }
+  setBusy(false);
+  setState('plan');
+  if (mobile) planSheet();
+  // the plan lands on the room the visitor was looking at
+  const rm = s && cur.rooms.find(q => q.name === s.room);
+  planHoverSet(rm || null);
+  focusSoft($('#pp-rooms button.hot') || $('#pp-rooms button'));
+}
+/* the glass label that follows the pointer over the photograph of the tour: it comes with
+   movement, goes after two idle seconds or when the pointer leaves, never sits over the band,
+   the mini card or a button, and holds the tour while it shows */
+const lens = (() => {
+  let on = false, idleT = 0, q = 0, x = 0, y = 0, down = null;
+  const n = el.lens;
+  const ok = e => state === 'inside' && !busy && e.pointerType !== 'touch' && !!e.target.closest && !!e.target.closest('#photos');
+  const box = node => { const b = node && node.offsetParent !== null ? node.getBoundingClientRect() : null; return b && b.width ? b : null; };
+  function place(first) {
+    q = 0;
+    if (!on) return;
+    const c = el.card.getBoundingClientRect(), w = n.offsetWidth, h = n.offsetHeight, gap = 16;
+    // what the label must keep clear of, in page coordinates
+    const keep = [el.band, el.minicard, el.miniNav, el.tl, el.tr].map(box).filter(Boolean);
+    const clear = (l, t) => l >= c.left + 8 && t >= c.top + 8 && l + w <= c.right - 8 && t + h <= c.bottom - 8 &&
+      keep.every(b => l + w + 6 < b.left || l - 6 > b.right || t + h + 6 < b.top || t - 6 > b.bottom);
+    const spots = [[x + gap, y + gap, 0], [x - gap - w, y + gap, 1], [x + gap, y - gap - h, 0], [x - gap - w, y - gap - h, 1]];
+    const at = spots.find(([l, t]) => clear(l, t));
+    if (!at) { n.classList.remove('on'); return; }
+    n.classList.toggle('glide', !first && !reduced);
+    n.classList.toggle('flip', !!at[2]);
+    n.style.transform = `translate3d(${(at[0] - c.left).toFixed(1)}px,${(at[1] - c.top).toFixed(1)}px,0)`;
+    n.classList.add('on');
+  }
+  function show(e) {
+    x = e.clientX; y = e.clientY;
+    const first = !on;
+    if (first) { on = true; tourHold('lens', true); place(true); }
+    else if (!q) q = requestAnimationFrame(() => place(false));
+    clearTimeout(idleT);
+    idleT = setTimeout(() => hide(), 2000);
+  }
+  function hide() {
+    clearTimeout(idleT);
+    cancelAnimationFrame(q); q = 0;
+    n.classList.remove('on', 'glide');
+    if (on) { on = false; tourHold('lens', false); }
+  }
+  function bind() {
+    el.card.addEventListener('pointermove', e => { if (ok(e)) show(e); else if (on) hide(); }, { passive: true });
+    el.card.addEventListener('pointerleave', hide);
+    el.card.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, type: e.pointerType }; }, { passive: true });
+    // a click on the photograph (not a drag, not a touch: touch has the button in the band) opens the plan
+    el.card.addEventListener('click', e => {
+      const d = down; down = null;
+      if (state !== 'inside' || busy || !e.target.closest('#photos')) return;
+      if (!d || d.type === 'touch' || Math.hypot(e.clientX - d.x, e.clientY - d.y) > 6) return;
+      insidePlan();
+    });
+  }
+  return { bind, hide };
+})();
 
 /* ---------- navigation ------------------------------------------------- */
 async function back() {
@@ -1555,6 +1685,7 @@ function bind() {
     if (act === 'back') return back();
     if (act === 'plan') return plan();
     if (act === 'inside') return inside();
+    if (act === 'see3d') return insidePlan();
     if (act === 'prev') return step(-1);
     if (act === 'next') return step(1);
     if (act === 'mini') return miniGo();
@@ -1598,7 +1729,7 @@ function bind() {
   }
   document.addEventListener('visibilitychange', () => { if (!document.hidden) breathe.start(); tourSync(); });
   // the tour holds still while the visitor points at or tabs through its controls, or presses on the photograph
-  const hold = (k, on) => { if (on) tour.hold.add(k); else tour.hold.delete(k); tourSync(); };
+  const hold = tourHold;
   [['band', el.band], ['mini', el.mini], ['back', el.back]].forEach(([k, n]) => {
     n.addEventListener('pointerenter', e => { if (e.pointerType !== 'touch') hold(k, true); });
     n.addEventListener('pointerleave', () => hold(k, false));
@@ -1607,6 +1738,7 @@ function bind() {
   });
   el.card.addEventListener('pointerdown', e => { if (tourOn() && !e.target.closest('button, a, .band')) hold('press', true); }, { passive: true });
   ['pointerup', 'pointercancel'].forEach(t => document.addEventListener(t, () => { if (tour.hold.has('press')) hold('press', false); }, { passive: true }));
+  lens.bind();
   bindForm();
 }
 
@@ -1639,6 +1771,7 @@ addEventListener('DOMContentLoaded', boot);
 
 return {
   fly, back, goTo, step, state: () => state, busy: () => busy, cur: () => cur, viewer: () => viewer,
+  shot: () => shots.list[shots.i] || null, tourHeld: () => [...tour.hold],
   notch: () => N.cur, fit: () => ({ ...fit }), RESIDENCES
 };
 })();

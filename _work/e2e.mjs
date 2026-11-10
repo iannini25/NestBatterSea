@@ -16,6 +16,7 @@ const results = [];
 const check = (name, ok, detail = '') => { results.push({ name, ok: !!ok, detail }); console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}${detail ? '  ·  ' + detail : ''}`); };
 const note = msg => console.log(`note  ${msg}`);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+const DWELL_MS = 6000;                                          // seconds on a view of the tour (DWELL in js/app.js)
 
 const browser = await puppeteer.launch({
   executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
@@ -242,6 +243,46 @@ const loftShots = await p.evaluate(() => [...document.querySelectorAll('#photos 
 await p.click('#back');
 await waitState(p, 'home', 40000);
 check('Back outside returns to the window', await st(p) === 'home');
+// the tour opens the 3D plan from the view on screen: a glass label follows the pointer over the photograph
+{
+  await p.click('#panel [data-act="inside"]');
+  await waitState(p, 'inside', 40000);
+  await p.mouse.move(5, 450);                                   // off the card: nothing holds the tour
+  await sleep(300);
+  const i0 = await text(p, '#cap-i');
+  await sleep(DWELL_MS + 1600);
+  const i1 = await text(p, '#cap-i');
+  check('The tour advances on its own when the pointer is not on the photograph', i1 !== i0 && await p.evaluate(() => !document.querySelector('#lens').classList.contains('on')), `${i0} → ${i1}`);
+  const mid = await p.evaluate(() => { const r = document.querySelector('#card').getBoundingClientRect(); return { x: r.left + r.width * .45, y: r.top + r.height * .45 }; });
+  await p.mouse.move(mid.x, mid.y);
+  await p.mouse.move(mid.x + 12, mid.y + 6, { steps: 3 });
+  await sleep(500);
+  const ln = await p.evaluate(() => {
+    const l = document.querySelector('.lens-in').getBoundingClientRect(), hit = (a, b) => !(a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.bottom);
+    return { on: document.querySelector('#lens').classList.contains('on'), op: +getComputedStyle(document.querySelector('.lens-in')).opacity, text: document.querySelector('.lens-in').textContent.trim(),
+      held: App.tourHeld().includes('lens'), clear: ['#band', '#minicard', '.mini-nav', '#back'].every(s => !hit(l, document.querySelector(s).getBoundingClientRect())),
+      btn: getComputedStyle(document.querySelector('#see3d')).display !== 'none' && document.querySelector('#see3d').tabIndex === 0 };
+  });
+  await shot(p, '11b-inside-3d-label');
+  check('Pointing at a tour photograph shows the 3D plan label, clear of the band and mini card, and holds the tour', ln.on && ln.op > .9 && ln.text === 'Explore the 3D floor plan' && ln.held && ln.clear && ln.btn, JSON.stringify(ln));
+  await sleep(2600);
+  check('The label fades after two idle seconds and lets the tour run again', await p.evaluate(() => !document.querySelector('#lens').classList.contains('on') && !App.tourHeld().includes('lens')));
+  await p.mouse.move(mid.x, mid.y);                             // the label shows again and holds the view
+  const want = await p.evaluate(() => App.shot());
+  await p.mouse.click(mid.x, mid.y);
+  await p.waitForFunction('App.state() === "moving"', { timeout: 5000 });
+  await sleep(900);
+  await shot(p, '11c-inside-to-3d-mid');
+  await waitState(p, 'plan', 30000);
+  await sleep(500);
+  await shot(p, '11d-inside-to-3d-plan');
+  const pl = await p.evaluate(() => ({ mode: App.viewer() && App.viewer().mode, lv: App.viewer() && App.viewer().v ? App.viewer().v.level : null, hot: (document.querySelector('#pp-rooms button.hot') || {}).textContent || '',
+    mini: document.querySelector('#mini-n').textContent, back: document.querySelector('#backlbl').textContent, photos: document.querySelectorAll('#photos .shot').length, pose: document.querySelector('#plan').classList.contains('pose') }));
+  check('A click on the photograph opens the 3D plan on the room shown', pl.photos === 0 && !pl.pose && pl.hot.trim() === want.room && pl.mini === want.room && (pl.mode !== '3d' || pl.lv === want.level) && pl.back === 'Back to the residence', `${want.name} (${want.id}) → ${JSON.stringify(pl)}`);
+  await p.click('#back');
+  await waitState(p, 'home', 30000);
+  check('Back from that plan returns to the residence', await p.evaluate(() => App.state() === 'home' && getComputedStyle(document.querySelector('#still')).visibility === 'visible' && getComputedStyle(document.querySelector('#plan')).visibility === 'hidden'));
+}
 await p.click('#back');
 await waitState(p, 'tower', 40000);
 await sleep(600);
@@ -502,6 +543,20 @@ check('Phone tour: the counter carries the illustrative mark', /Illustrative/.te
 await p.tap('.bnav [data-act="next"]');
 await sleep(1200);
 check('Phone: tour arrows in the band, named for views', (await text(p, '#cap-i')).startsWith('02') && await p.evaluate(() => document.querySelector('#bnext').getAttribute('aria-label') === 'Next view'));
+{
+  // touch has no hover: a tap on the photograph keeps the tour, the 3D plan button opens the plan
+  await p.touchscreen.tap(195, 320);
+  await sleep(400);
+  const tapStay = await st(p);
+  const want = await p.evaluate(() => App.shot());
+  const bt = await p.evaluate(() => { const b = document.querySelector('#see3d').getBoundingClientRect(), c = document.querySelector('#cap').getBoundingClientRect(), n = document.querySelector('.bnav').getBoundingClientRect(); return { vis: b.width > 0 && b.right <= innerWidth, clear: b.bottom <= c.top || b.left >= c.right, text: document.querySelector('#see3d').textContent.trim() }; });
+  await p.tap('#see3d');
+  await waitState(p, 'plan', 30000);
+  await sleep(600);
+  await shot(p, '31b-phone-tour-to-3d');
+  const pl = await p.evaluate(() => ({ hot: ((document.querySelector('#pp-rooms button.hot') || {}).textContent || '').trim(), back: document.querySelector('#backlbl').textContent }));
+  check('Phone: a tap on the photograph keeps the tour; the 3D plan button opens the plan on that room', tapStay === 'inside' && bt.vis && bt.clear && bt.text === '3D plan' && pl.hot === want.room, JSON.stringify({ tapStay, bt, pl, want: want.room }));
+}
 await p.tap('.logo');
 await waitState(p, 'tower', 20000);
 // the page on a phone: scrolled through like a visitor, then a full page picture
